@@ -390,7 +390,7 @@
    <header class="top" data-html-import-id="html-import-3">
     <div class="title-block" data-html-import-id="html-import-4">
      <div class="flex items-center gap-2" data-html-import-id="html-import-5">
-      <h1 data-html-import-id="html-import-6" data-template-id="h1-0" class="canva-text canva-text" style="color: rgb(11, 27, 45); font-weight: 700; font-style: normal; font-size: 22px;">住宅配置計画トレーニング</h1><span data-template-id="span-1" class="canva-text canva-text" style="font-size: 10px; color: rgb(82, 99, 117); white-space: nowrap; font-weight: 400; font-style: normal;" data-html-import-id="html-import-7">更新版（2026年10月3日更新）</span>
+      <h1 data-html-import-id="html-import-6" data-template-id="h1-0" class="canva-text canva-text" style="color: rgb(11, 27, 45); font-weight: 700; font-style: normal; font-size: 22px;">住宅配置計画トレーニング</h1><span data-template-id="span-1" class="canva-text canva-text" style="font-size: 10px; color: rgb(82, 99, 117); white-space: nowrap; font-weight: 400; font-style: normal;" data-html-import-id="html-import-7">更新版（2026年11月2日更新）</span>
      </div>
      <p data-html-import-id="html-import-8" data-template-id="p-2" class="canva-text canva-text" style="color: rgb(82, 99, 117); font-weight: 400; font-style: normal; font-size: 12px;">モジュール: 1マス = 910mm × 910mm (0.8281㎡) | 配置・接道・境界計画の総合評価</p>
     </div>
@@ -5362,21 +5362,60 @@ ${currentReport}
         score -= 15;
         return;
       }
-      // 始点・終点の向きは問わない：一方の端点が「必要とするブロック(from)」、もう一方が「到達先ブロック(to)」に達していれば有効
+      // 始点・終点の向きは問わない：一方の端点が「必要とするブロック(from)」、もう一方が「到達先ブロック(to)」に達していれば有効。
+      // さらに、別の部屋から引いた動線が、すでに到達先へ届いている動線の途中に合流している場合は、
+      // 合流した先までを含めて「その部屋からの動線」とみなす（合流後の部分は各部屋の動線の一部）。
       const touchesFrom = (pt) => typesAt(pt).has(cfg.from);
       const touchesTo = (pt) => cfg.to.some(t => typesAt(pt).has(t));
-      const valid = drawn.filter(r => {
+      const resolved = new Map();   // 動線の番号 -> from側から到達先までの経路（頂点の並び）
+      const hosts = new Map();      // 動線の番号 -> 到達先(to)に端点が届いている経路（到達先側が末尾）。他の動線が合流できる幹線
+      const coverPoints = [];       // 「必要とするブロック」側の端点（どの部屋から出ているかの判定用）
+      drawn.forEach((r, i) => {
         const a = r[0], b = r[r.length - 1];
-        return (touchesFrom(a) && touchesTo(b)) || (touchesFrom(b) && touchesTo(a));
+        // 到達先に端点が届いている動線は、他の部屋の動線が合流できる幹線になる（幹線自体の反対側の端点は問わない）
+        if (touchesTo(b)) hosts.set(i, r.slice());
+        else if (touchesTo(a)) hosts.set(i, r.slice().reverse());
+        const ab = touchesFrom(a) && touchesTo(b), ba = touchesFrom(b) && touchesTo(a);
+        if (!ab && !ba) return;
+        resolved.set(i, ab ? r.slice() : r.slice().reverse());
+        if (touchesFrom(a)) coverPoints.push(a);
+        if (touchesFrom(b)) coverPoints.push(b);
       });
+      const cellsOnSegment = (p, q) => rasterSegment(p, q);
+      for (let pass = 0; pass < drawn.length; pass++) {
+        let progressed = false;
+        drawn.forEach((r, i) => {
+          if (resolved.has(i) || hosts.has(i)) return;
+          [[r[0], r[r.length - 1], false], [r[r.length - 1], r[0], true]].forEach(([fromPt, mergePt, rev]) => {
+            if (resolved.has(i) || !touchesFrom(fromPt)) return;
+            // mergePt が、到達先へ届いている動線H上（頂点または線の途中）にあれば合流とみなす
+            hosts.forEach((H, hi) => {
+              if (resolved.has(i) || hi === i) return;
+              for (let k = 0; k < H.length - 1; k++) {
+                if (cellsOnSegment(H[k], H[k + 1]).some(cell => cell.fr === mergePt.fr && cell.fc === mergePt.fc)) {
+                  const own = rev ? r.slice().reverse() : r.slice();   // fromPt → mergePt
+                  const tail = H.slice(k + 1);                          // 合流点から先（到達先まで）
+                  const merged = own.concat(samePoint(own[own.length - 1], H[k + 1]) ? tail.slice(1) : tail);
+                  resolved.set(i, merged);
+                  hosts.set(i, merged);
+                  coverPoints.push(fromPt);
+                  progressed = true;
+                  return;
+                }
+              }
+            });
+          });
+        });
+        if (!progressed) break;
+      }
+      const valid = [...resolved.values()];
       if (valid.length === 0) {
-        items.push({ title: cfg.title, status: 'bad', text: `描かれた${cfg.title}の端点が、${cfg.fromLabel}と${cfg.toLabel}に達していません。動線の一方の端を${cfg.fromLabel}、もう一方の端を${cfg.toLabel}に届かせてください（描く向きは問いません）（図の${cfg.colorName}線）。` });
+        items.push({ title: cfg.title, status: 'bad', text: `描かれた${cfg.title}の端点が、${cfg.fromLabel}と${cfg.toLabel}に達していません。動線の一方の端を${cfg.fromLabel}、もう一方の端を${cfg.toLabel}に届かせてください（描く向きは問いません。別の動線の途中に合流してもかまいません）。` });
         score -= 15;
         return;
       }
       const comps = floodFillGroups((r, c) => footprintMask[r][c] && blockGrid[r][c] === cfg.from);
-      const endpointsOf = (r) => [r[0], r[r.length - 1]];
-      const uncovered = comps.filter(comp => !valid.some(r => endpointsOf(r).some(pt => touchingCells(pt).some(([tr, tc]) => comp.some(([fr, fc]) => fr === tr && fc === tc)))));
+      const uncovered = comps.filter(comp => !coverPoints.some(pt => touchingCells(pt).some(([tr, tc]) => comp.some(([fr, fc]) => fr === tr && fc === tc))));
       if (uncovered.length > 0) {
         items.push({ title: cfg.title, status: 'warn', text: `${cfg.fromLabel}の一部（${uncovered.length}か所）から、${cfg.toLabel}への${cfg.title}が描かれていません。すべての${cfg.fromLabel}から動線を描きましょう。` });
         score -= 8;
