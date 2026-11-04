@@ -70,6 +70,23 @@
   .pattern-tabs button.active { background: var(--ink-navy); color: #fff; font-weight: 700; }
   .pattern-tabs button:hover:not(.active) { background: #DDE5EE; }
 
+  .floor-btn { padding: 6px 12px; border: 1.5px solid var(--ink-navy); background: #F8FAFC; color: var(--ink-navy); border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .floor-btn.active { background: var(--ink-navy); color: #fff; font-weight: 700; }
+  .floor-panel-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 8px; }
+  .floor-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .floor-row-label { font-size: 12px; font-weight: 700; color: #526375; min-width: 76px; }
+  .floor-btns { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+  .floor-hint { font-size: 11px; color: #526375; line-height: 1.5; margin: 4px 0 0; }
+  .floor-tabs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0 0 8px; }
+  .floor-tabs-label { font-size: 11px; font-weight: 700; color: #526375; }
+  .floor-tabs-note { font-size: 11px; color: #7C8896; }
+  .floor-notice { font-size: 11px; color: #B45309; }
+  .floor-locked { opacity: .35; pointer-events: none; }
+  .stage-container > .floor-tabs { margin: 0 0 10px; }
+  .stage-container .floor-tabs-label { color: #C9D3E0; }
+  .stage-container .floor-tabs-note { color: #9FB3C8; }
+  .stage-container .floor-notice { color: #FFD37A; }
+  .stage-container .floor-btn.active { background: #FFD37A; color: #0E2238; border-color: #FFD37A; }
   .settings-jump-group { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; margin: 0 0 16px; }
   .settings-jump-btn { flex: 1 1 180px; min-height: 38px; padding: 8px 12px; border: 1.5px solid var(--ink-navy); background: var(--paper-panel); color: var(--ink-navy); border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 700; white-space: nowrap; transition: background .15s ease, color .15s ease; }
   .settings-jump-btn:hover, .settings-jump-btn:focus-visible, .settings-jump-btn.is-open { background: var(--ink-navy); color: #fff !important; }
@@ -390,7 +407,7 @@
    <header class="top" data-html-import-id="html-import-3">
     <div class="title-block" data-html-import-id="html-import-4">
      <div class="flex items-center gap-2" data-html-import-id="html-import-5">
-      <h1 data-html-import-id="html-import-6" data-template-id="h1-0" class="canva-text canva-text" style="color: rgb(11, 27, 45); font-weight: 700; font-style: normal; font-size: 22px;">住宅配置計画トレーニング</h1><span data-template-id="span-1" class="canva-text canva-text" style="font-size: 10px; color: rgb(82, 99, 117); white-space: nowrap; font-weight: 400; font-style: normal;" data-html-import-id="html-import-7">更新版（2026年11月2日更新）</span>
+      <h1 data-html-import-id="html-import-6" data-template-id="h1-0" class="canva-text canva-text" style="color: rgb(11, 27, 45); font-weight: 700; font-style: normal; font-size: 22px;">住宅配置計画トレーニング</h1><span data-template-id="span-1" class="canva-text canva-text" style="font-size: 10px; color: rgb(82, 99, 117); white-space: nowrap; font-weight: 400; font-style: normal;" data-html-import-id="html-import-7">更新版（2026年11月4日更新）</span>
      </div>
      <p data-html-import-id="html-import-8" data-template-id="p-2" class="canva-text canva-text" style="color: rgb(82, 99, 117); font-weight: 400; font-style: normal; font-size: 12px;">モジュール: 1マス = 910mm × 910mm (0.8281㎡) | 配置・接道・境界計画の総合評価</p>
     </div>
@@ -402,7 +419,7 @@
    </header>
    <div id="step1View" data-html-import-id="html-import-13">
     <div class="settings-jump-group" role="group" aria-label="配置条件設定" data-html-import-id="html-import-14">
-     <button type="button" class="settings-jump-btn canva-button canva-button" data-template-id="button-6" onclick="toggleSettingPanel('roadPanel', this)" style="color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 12px;" data-html-import-id="html-import-15">敷地条件</button> <button type="button" class="settings-jump-btn canva-button canva-button" data-template-id="button-7" onclick="toggleSettingPanel('parkingPanel', this)" style="color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 12px;" data-html-import-id="html-import-16">必要駐車条件（設定）</button>
+     <button type="button" class="settings-jump-btn canva-button canva-button" data-template-id="button-6" onclick="toggleSettingPanel('roadPanel', this)" style="color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 12px;" data-html-import-id="html-import-15">敷地条件</button> <button type="button" id="floorJumpBtn" class="settings-jump-btn canva-button canva-button" onclick="toggleSettingPanel('floorPanel', this)" aria-expanded="false" style="color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 12px;">階数：1階建て（作図中：1階）</button> <button type="button" class="settings-jump-btn canva-button canva-button" data-template-id="button-7" onclick="toggleSettingPanel('parkingPanel', this)" style="color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 12px;" data-html-import-id="html-import-16">必要駐車条件（設定）</button>
      <div id="roadPanel" class="settings-accordion-panel canva-container" aria-hidden="true" data-html-import-id="html-import-17" data-template-id="div-8">
       <div class="pattern-tabs" data-html-import-id="html-import-18">
        <div class="pattern-group" data-html-import-id="html-import-19">
@@ -514,6 +531,7 @@
        </div>
       </div>
      </div>
+     <div id="floorPanel" class="settings-accordion-panel canva-container" aria-hidden="true"><div id="floorPanelBody"></div></div>
      <div id="dimensionPanel" class="settings-accordion-panel canva-container" aria-hidden="true" data-html-import-id="html-import-120" data-template-id="div-81"></div>
      <div id="parkingPanel" class="settings-accordion-panel canva-container" aria-hidden="true" data-html-import-id="html-import-121" data-template-id="div-82">
       <div class="bg-slate-50 border border-slate-200 rounded p-2.5 mb-2 text-xs canva-container parking-settings-panel canva-container" id="parkingSettingsAnchor" data-html-import-id="html-import-122" data-template-id="div-83" style="background: rgb(248, 250, 252); font-size: 12px;">
@@ -561,12 +579,17 @@
        <button onclick="setTargetBCR(40)" data-html-import-id="html-import-155" data-template-id="button-111" class="canva-button canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-style: normal; font-size: 12px;">40%</button> <button class="active canva-button canva-button" onclick="setTargetBCR(50)" data-html-import-id="html-import-156" data-template-id="button-112" style="background: rgb(19, 42, 69); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 12px;">50%</button> <button onclick="setTargetBCR(60)" data-html-import-id="html-import-157" data-template-id="button-113" class="canva-button canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-style: normal; font-size: 12px;">60%</button> <button onclick="setTargetBCR(70)" data-html-import-id="html-import-158" data-template-id="button-114" class="canva-button canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-style: normal; font-size: 12px;">70%</button> <button onclick="setTargetBCR(80)" data-html-import-id="html-import-159" data-template-id="button-115" class="canva-button canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-style: normal; font-size: 12px;">80%</button>
       </div>
      </div>
+     <div class="bcr-select-group" id="farSelectGroup">
+      <label class="canva-text" style="color: rgb(19, 42, 69); font-weight: 700; font-size: 16px;">指定容積率:</label>
+      <div class="bcr-btn-group" id="farSelector"><button type="button" onclick="setTargetFAR(50)" class="canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-size: 12px;">50%</button> <button type="button" onclick="setTargetFAR(60)" class="canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-size: 12px;">60%</button> <button type="button" onclick="setTargetFAR(80)" class="canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-size: 12px;">80%</button> <button type="button" onclick="setTargetFAR(100)" class="canva-button active" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-size: 12px;">100%</button> <button type="button" onclick="setTargetFAR(150)" class="canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-size: 12px;">150%</button> <button type="button" onclick="setTargetFAR(200)" class="canva-button" style="background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 600; font-size: 12px;">200%</button></div>
+     </div>
      <div class="bcr-meter canva-container canva-container" id="bcrMeter" data-html-import-id="html-import-160" data-template-id="div-116" style="background: rgb(240, 244, 248); font-size: 12px;"><canva-inline-text data-template-id="canva-inline-text-117" class="canva-text canva-text" style="color: rgb(45, 62, 80); font-weight: 400; font-style: normal; font-size: 12px;" data-html-import-id="html-import-161">
        建蔽率:
       </canva-inline-text><span id="bcrValue" data-html-import-id="html-import-162" data-template-id="span-118" class="canva-text canva-text" style="color: rgb(45, 62, 80); font-weight: 400; font-style: normal; font-size: 16px;">0.0%</span><canva-inline-text data-template-id="canva-inline-text-119" class="canva-text canva-text" style="color: rgb(45, 62, 80); font-weight: 400; font-style: normal; font-size: 12px;" data-html-import-id="html-import-163">
        /
       </canva-inline-text><span id="bcrLimitText" data-html-import-id="html-import-164" data-template-id="span-120" class="canva-text canva-text" style="color: rgb(45, 62, 80); font-weight: 400; font-style: normal; font-size: 16px;">50.0%</span>
      </div>
+     <div class="bcr-meter canva-container" id="farMeter" style="background: rgb(240, 244, 248); font-size: 12px;">容積率: <span id="farValue" style="font-size: 16px;">0.0%</span> / <span id="farLimitText" style="font-size: 16px;">100%</span><span id="farLimitNote" style="display:block; font-size:10px; color:#526375; margin-top:2px;"></span></div>
     </div>
     <div class="layout" data-html-import-id="html-import-165">
      <!-- Toolbar -->
@@ -599,7 +622,7 @@
         <button class="active canva-button canva-button" onclick="setPaintMode('cell')" style="flex: 1 1 0%; background: rgb(19, 42, 69); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 12px;" data-html-import-id="html-import-185" data-template-id="button-134">セル単位</button> <button onclick="setPaintMode('bucket')" style="flex: 1 1 0%; background: rgb(248, 250, 252); color: rgb(19, 42, 69); font-weight: 500; font-style: normal; font-size: 12px;" title="囲まれた未塗りの範囲をタップで一括塗りつぶし" data-html-import-id="html-import-186" data-template-id="button-135" class="canva-button canva-button">🪣 バケツ</button>
        </div>
        <p style="font-size: 10px; color: rgb(124, 136, 150); margin: 4px 2px 0px; line-height: 1.4; font-weight: 400; font-style: normal;" data-html-import-id="html-import-187" data-template-id="p-136" class="canva-text canva-text">先に境界線を塗ってから、内側の未塗りマスをタップすると、その範囲を選択中の要素で一括塗りつぶしします（消しゴム選択時は、囲まれた塗り済みの範囲を一括で消せます）。</p>
-      </div><button class="tool-btn active canva-button canva-button" data-tool="parking" data-html-import-id="html-import-188" data-template-id="button-137" style="background: rgb(255, 255, 255); color: rgb(11, 27, 45); font-weight: 700; font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(158, 166, 178);" data-html-import-id="html-import-189" data-template-id="span-138"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-190" data-template-id="span-139" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">駐車スペース</span> </button> <button class="tool-btn canva-button canva-button" data-tool="house" data-html-import-id="html-import-191" data-template-id="button-140" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(245, 239, 224); border-color: var(--ink-navy);" data-html-import-id="html-import-192" data-template-id="span-141"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-193" data-template-id="span-142" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">住宅ヴォリューム</span> </button> <button class="tool-btn canva-button canva-button" data-tool="car" data-html-import-id="html-import-194" data-template-id="button-143" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(255, 255, 255); border: 1.5px solid rgb(26, 56, 92); display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1; color: rgb(11, 27, 45); font-weight: 400; font-style: normal;" data-html-import-id="html-import-195" data-template-id="span-144">🚗</span> <span class="label canva-text canva-text" data-html-import-id="html-import-196" data-template-id="span-145" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">自動車 (駐車スペースに配置)</span> </button>
+      </div><button class="tool-btn active canva-button canva-button" data-tool="parking" data-html-import-id="html-import-188" data-template-id="button-137" style="background: rgb(255, 255, 255); color: rgb(11, 27, 45); font-weight: 700; font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(158, 166, 178);" data-html-import-id="html-import-189" data-template-id="span-138"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-190" data-template-id="span-139" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">駐車スペース</span> </button> <button class="tool-btn canva-button canva-button" data-tool="house" data-html-import-id="html-import-191" data-template-id="button-140" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(245, 239, 224); border-color: var(--ink-navy);" data-html-import-id="html-import-192" data-template-id="span-141"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-193" data-template-id="span-142" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">住宅ヴォリューム</span> </button> <button class="tool-btn multi-only canva-button" data-tool="stairs" style="display:none; background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text" style="background: #C98F3B;"></span> <span class="label canva-text" style="color: rgb(11, 27, 45); font-weight: 400; font-size: 16px;">階段</span> </button> <button class="tool-btn upper-only canva-button" data-tool="balcony" style="display:none; background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text" style="background: #8FD3C1;"></span> <span class="label canva-text" style="color: rgb(11, 27, 45); font-weight: 400; font-size: 16px;">バルコニー</span> </button> <button class="tool-btn upper-only canva-button" data-tool="roof" style="display:none; background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text" style="background: #B07C6B;"></span> <span class="label canva-text" style="color: rgb(11, 27, 45); font-weight: 400; font-size: 16px;"><span id="roofLabel">1階屋根</span></span> </button> <button class="tool-btn canva-button canva-button" data-tool="car" data-html-import-id="html-import-194" data-template-id="button-143" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(255, 255, 255); border: 1.5px solid rgb(26, 56, 92); display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1; color: rgb(11, 27, 45); font-weight: 400; font-style: normal;" data-html-import-id="html-import-195" data-template-id="span-144">🚗</span> <span class="label canva-text canva-text" data-html-import-id="html-import-196" data-template-id="span-145" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">自動車 (駐車スペースに配置)</span> </button>
       <p style="font-size: 10px; color: rgb(124, 136, 150); margin: -6px 2px 10px; line-height: 1.4; font-weight: 400; font-style: normal;" data-html-import-id="html-import-197" data-template-id="p-146" class="canva-text canva-text">実寸 幅1.8m×奥行4.5m（2マス×5マス）で配置されます。空きマスをクリックすると新規配置。配置済みの車をドラッグすると位置を移動でき、ドラッグせずクリックすると向きが90°回転します。</p><!-- 駐車条件設定パネル --> <button class="tool-btn canva-button canva-button" data-tool="approach" data-html-import-id="html-import-198" data-template-id="button-147" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(229, 178, 93);" data-html-import-id="html-import-199" data-template-id="span-148"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-200" data-template-id="span-149" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">アプローチ</span> </button>
       <div class="tool-btn-row" data-html-import-id="html-import-201">
        <button class="tool-btn canva-button canva-button" data-tool="entrance" style="flex: 1 1 0%; background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;" data-html-import-id="html-import-202" data-template-id="button-150"> <span class="swatch canva-text canva-text" style="background: rgb(230, 81, 0); display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-size: 10px; font-weight: 700; font-style: normal;" data-html-import-id="html-import-203" data-template-id="span-151">▲</span> <span class="label canva-text canva-text" data-html-import-id="html-import-204" data-template-id="span-152" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">玄関 (▲)</span> </button> <button class="tool-action-btn canva-button canva-button" id="rotateEntranceBtn" title="玄関の向きを変更" style="display: none; color: rgb(19, 42, 69); background: rgb(244, 246, 249); font-weight: 700; font-style: normal; font-size: 14px;" data-html-import-id="html-import-205" data-template-id="button-153">↻</button>
@@ -1567,6 +1590,483 @@
   let routeGesture = null;     // 押下中の操作 { confirmOnUp: boolean }
   let routeLastAction = { t: 0, x: -999, y: -999 };
 
+  // ===== 指定容積率 =====
+  // 前面道路の幅員による容積率制限：最も広い道路の幅員(m) × 0.4（40%）と指定容積率の小さいほうを適用する。
+  const FAR_VALUES = [50, 60, 80, 100, 150, 200];
+  let targetFAR = 100;
+  function farLimitInfo() {
+    const W = { S: roadWidthS, N: roadWidthN, E: roadWidthE, W: roadWidthW };
+    const dirs = PATTERN_ROADS[currentPattern] || [];
+    const widest = dirs.reduce((m, d) => Math.max(m, Number(W[d]) || 0), 0);
+    const roadLimit = widest * 40;
+    return { widest, roadLimit, applied: Math.min(targetFAR, roadLimit || targetFAR), byRoad: roadLimit > 0 && roadLimit < targetFAR, twoRoads: dirs.length >= 2 };
+  }
+  function computeFAR() {
+    let siteCount = 0;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      if (zoneGrid[r][c] === 'site' && !isSetbackCell(r, c) && !isCornerCutCell(r, c)) siteCount++;
+    }
+    let cells = 0;
+    for (let n = 1; n <= floorCount; n++) cells += countHouseCells(floorStateGrid(n));
+    const floorArea = cells / MASU_TO_FINE;
+    return { siteCount, floorArea, far: siteCount > 0 ? floorArea / siteCount * 100 : 0 };
+  }
+  function farItem() {
+    const { far, floorArea, siteCount } = computeFAR();
+    const info = farLimitInfo();
+    const basis = `前面道路${info.twoRoads ? '（広いほうの道路）' : ''}の幅員${info.widest}m×0.4＝${info.roadLimit}%と指定容積率${targetFAR}%の小さいほう＝${info.applied}%`;
+    if (floorArea === 0) return null;
+    if (far > info.applied + 1e-9) {
+      return { title: '容積率超過', status: 'bad', text: `不適合：容積率${far.toFixed(1)}%（延べ面積${floorArea.toFixed(1)}マス／敷地${siteCount}マス）が適用上限${info.applied}%を超えています。${basis}。` };
+    }
+    return { title: '容積率', status: 'good', text: `適合：容積率${far.toFixed(1)}%（延べ面積${floorArea.toFixed(1)}マス／敷地${siteCount}マス）／適用上限${info.applied}%。${basis}。` };
+  }
+  function updateFARMeter() {
+    const el = document.getElementById('farValue');
+    if (!el) return;
+    const { far } = computeFAR();
+    const info = farLimitInfo();
+    el.innerText = `${far.toFixed(1)}%`;
+    document.getElementById('farLimitText').innerText = `${info.applied}%`;
+    document.getElementById('farLimitNote').innerText = info.roadLimit > 0
+      ? `前面道路${info.twoRoads ? '（広いほう）' : ''}${info.widest}m×0.4＝${info.roadLimit}%／指定${targetFAR}%${info.byRoad ? ' → 道路幅員の制限を適用' : ' → 指定容積率を適用'}`
+      : '';
+    document.getElementById('farMeter').classList.toggle('over', far > info.applied + 1e-9);
+  }
+  function setTargetFAR(val) {
+    val = FAR_VALUES.includes(Number(val)) ? Number(val) : 100;
+    targetFAR = val;
+    updateChoiceButtons('#farSelector', FAR_VALUES.indexOf(val));
+    updateBrief();
+    invalidateDiagnosis();
+    if (currentStep === 2) invalidateBlockDiagnosis();
+  }
+  window.setTargetFAR = setTargetFAR;
+
+  // ===== 階数（2階以上の配置計画・ブロックプラン） =====
+  // 1階のデータは従来の変数（stateGrid / blockGrid / routes / entrance / entranceArea / cars）をそのまま使う。
+  // 階を切り替えるときは、表示中の階のデータを floorStore に保存し、切替先の階のデータを同じ変数へ読み込む。
+  // 2階以上は「住宅ヴォリューム」だけを stateGrid に持ち、玄関・駐車・アプローチ・庭は1階の計画に属する。
+  const MAX_FLOORS = 3;
+  let floorCount = 1;
+  let currentFloor = 1;
+  const floorStore = {};
+  // 階段は住宅ヴォリュームの一部（床面積に含む）。バルコニー・屋根は床面積に含めない。
+  const isVol = v => v === 'house' || v === 'stairs';
+  const UPPER_TOOLS = ['house', 'stairs', 'balcony', 'roof', 'eraser'];
+  // 2階以上で、指定の道具で塗ってよいセルか（fine座標）
+  function upperPaintOk(tool, fr, fc) {
+    const st = stateGrid[fr] ? stateGrid[fr][fc] : null;
+    if (tool === 'house') return lowerHouseAt(fr, fc);
+    if (tool === 'stairs') return currentFloor === 1 ? true : lowerHouseAt(fr, fc);
+    if (tool === 'roof') return lowerHouseAt(fr, fc) && !isVol(st);
+    if (tool === 'balcony') return !isVol(st);
+    return true;
+  }
+  function upperToolNotice(tool) {
+    const lo = currentFloor - 1;
+    if (tool === 'house') return `${currentFloor}階の住宅は${lo}階の住宅ヴォリュームの範囲内にだけ配置できます（図の淡い青色の部分）。`;
+    if (tool === 'stairs') return `階段は、下の階（${lo}階）の住宅ヴォリュームの範囲内に配置できます。図の淡い青色の部分をクリックしてください。`;
+    if (tool === 'roof') return `${lo}階屋根は、${lo}階の住宅ヴォリュームの上で、${currentFloor}階の住宅がない部分に配置します。`;
+    if (tool === 'balcony') return 'バルコニーは、住宅ヴォリュームのない部分に配置します。';
+    return '';
+  }
+
+  function emptyFineGrid() {
+    return Array.from({ length: rows * 2 }, () => Array(cols * 2).fill(null));
+  }
+  function stashCurrentFloor() {
+    const d = floorStore[currentFloor] || (floorStore[currentFloor] = {});
+    d.stateGrid = stateGrid; d.blockGrid = blockGrid; d.blockGridDims = blockGridDims; d.routes = routes;
+    if (currentFloor === 1) d.extra = { entrance, entranceDir, entranceArea, cars };
+  }
+  function loadFloorToGlobals(n) {
+    let d = floorStore[n];
+    const okDims = d && Array.isArray(d.stateGrid) && d.stateGrid.length === rows * 2 && (d.stateGrid[0] || []).length === cols * 2;
+    if (!d || (n > 1 && !okDims)) d = floorStore[n] = { stateGrid: emptyFineGrid(), blockGrid: null, blockGridDims: { rows: 0, cols: 0 }, routes: { life: [], chore: [] } };
+    currentFloor = n;
+    stateGrid = d.stateGrid; blockGrid = d.blockGrid || null; blockGridDims = d.blockGridDims || { rows: 0, cols: 0 };
+    routes = d.routes || { life: [], chore: [] };
+    if (n === 1 && d.extra) { entrance = d.extra.entrance; entranceDir = d.extra.entranceDir; entranceArea = d.extra.entranceArea; cars = d.extra.cars; }
+    else if (n > 1) { entrance = null; entranceArea = []; cars = []; }
+  }
+  // 指定した階のデータを現在のデータとして扱いながら fn を実行し、終了後に元の階へ戻す
+  function runOnFloor(n, fn) {
+    if (n === currentFloor) return fn();
+    const keep = currentFloor;
+    stashCurrentFloor(); loadFloorToGlobals(n);
+    try { return fn(); } finally { stashCurrentFloor(); loadFloorToGlobals(keep); }
+  }
+  function floorStateGrid(n) { return n === currentFloor ? stateGrid : (floorStore[n] && floorStore[n].stateGrid) || null; }
+  function floorBlockGridOf(n) { return n === currentFloor ? blockGrid : (floorStore[n] && floorStore[n].blockGrid) || null; }
+  function lowerHouseAt(fr, fc) {
+    const g = floorStateGrid(currentFloor - 1);
+    return !!(g && g[fr] && isVol(g[fr][fc]));
+  }
+  function countHouseCells(grid) {
+    let n = 0;
+    if (grid) for (const row of grid) for (const v of row) if (isVol(v)) n++;
+    return n;
+  }
+  function pruneUpperFloorAgainstLower() {
+    if (currentFloor < 2) return 0;
+    let removed = 0;
+    for (let fr = 0; fr < stateGrid.length; fr++) for (let fc = 0; fc < stateGrid[fr].length; fc++) {
+      const v = stateGrid[fr][fc];
+      if (v === null) continue;
+      const needsLower = isVol(v) || v === 'roof';
+      if (!(needsLower || v === 'balcony') || (needsLower && !lowerHouseAt(fr, fc))) { stateGrid[fr][fc] = null; if (isVol(v)) removed++; }
+    }
+    return removed;
+  }
+  function rebuildFootprint() {
+    const R = rows * 2, C = cols * 2;
+    footprintMask = stateGrid.map(row => row.map(v => isVol(v)));
+    footprintBBox = { minFR: 0, maxFR: R - 1, minFC: 0, maxFC: C - 1 };
+  }
+  // 配置計画の塗り色。2階以上では下の階の住宅ヴォリュームと1階の外構を淡色で下敷き表示する。
+  function siteCellFill(fr, fc) {
+    const st = stateGrid[fr][fc];
+    if (st === 'house') return '#F5EFE0';
+    if (st === 'stairs') return '#C98F3B';
+    if (st === 'balcony') return '#8FD3C1';
+    if (st === 'roof') return '#B07C6B';
+    if (currentFloor > 1) {
+      const lower = floorStateGrid(currentFloor - 1);
+      if (lower && lower[fr] && isVol(lower[fr][fc])) return '#5B7FA6';
+      const g1 = floorStateGrid(1);
+      const s1 = g1 && g1[fr] ? g1[fr][fc] : null;
+      if (isVol(s1)) return '#3C5877';
+      if (s1 === 'parking') return '#3E4C5E';
+      if (s1 === 'garden') return '#2F4F3A';
+      if (s1 === 'approach') return '#6B5530';
+      return '#1A385C';
+    }
+    if (st === 'parking') return '#9EA6B2';
+    if (st === 'garden') return '#6BA875';
+    if (st === 'approach') return '#E5B25D';
+    return '#1A385C';
+  }
+  function setFloorNotice(msg) {
+    document.querySelectorAll('.floor-notice').forEach(el => { el.textContent = msg || ''; });
+  }
+
+  function switchFloor(n) {
+    n = Math.max(1, Math.min(floorCount, Number(n) | 0));
+    if (n === currentFloor) { renderFloorUi(); return; }
+    routeDraft = null; routeGesture = null; isPointerDown = false; carDrag = null; isBlockPointerDown = false;
+    stashCurrentFloor();
+    loadFloorToGlobals(n);
+    historyStack = []; blockHistoryStack = []; blockResetSnapshot = null; resetSnapshot = null;
+    let notice = '';
+    if (n > 1) {
+      const removed = pruneUpperFloorAgainstLower();
+      if (removed) notice = `${n - 1}階の住宅ヴォリュームの外にあった${(removed / 4).toFixed(1)}マス分を取り除きました。`;
+    }
+    pushHistory();
+    rebuildFootprint();
+    const hasHouse = countHouseCells(stateGrid) > 0;
+    if (currentStep === 2) {
+      if (hasHouse) goToStep(2);
+      else { goToStep(1); notice = `${n}階の住宅ヴォリュームがまだありません。配置計画で「住宅」を配置してからブロックプランへ進んでください。`; }
+    }
+    applyFloorUiState();
+    renderAll(); invalidateDiagnosis();
+    if (currentStep === 2) { renderBlockAll(); updateBlockStats(); invalidateBlockDiagnosis(); }
+    updateBrief();
+    renderFloorUi(notice);
+  }
+  window.switchFloor = switchFloor;
+
+  function setFloorCount(k) {
+    k = Math.max(1, Math.min(MAX_FLOORS, Number(k) | 0));
+    floorCount = k;
+    if (currentFloor > k) switchFloor(k);
+    applyFloorUiState();
+    updateBrief();
+    renderFloorUi();
+    invalidateDiagnosis();
+    if (currentStep === 2) invalidateBlockDiagnosis();
+  }
+  window.setFloorCount = setFloorCount;
+
+  function applyFloorUiState() {
+    const upper = currentFloor > 1;
+    const allowed = UPPER_TOOLS;
+    document.querySelectorAll('.tool-btn.upper-only').forEach(b => { b.style.display = upper ? '' : 'none'; });
+    document.querySelectorAll('.tool-btn.multi-only').forEach(b => { b.style.display = floorCount > 1 ? '' : 'none'; });
+    if (floorCount === 1 && currentTool === 'stairs') {
+      currentTool = 'house';
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tool') === 'house'));
+    }
+    const roofLabel = document.getElementById('roofLabel');
+    if (roofLabel) roofLabel.textContent = `${Math.max(1, currentFloor - 1)}階屋根`;
+    document.querySelectorAll('.tool-btn').forEach(b => {
+      const lock = upper && !allowed.includes(b.getAttribute('data-tool'));
+      b.classList.toggle('floor-locked', lock);
+      b.disabled = lock;
+    });
+    if (upper && currentTool !== 'block' && currentTool !== 'route' && !allowed.includes(currentTool)) {
+      currentTool = 'house';
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tool') === 'house'));
+      const rotateBtn = document.getElementById('rotateEntranceBtn');
+      if (rotateBtn) rotateBtn.style.display = 'none';
+    }
+    document.querySelectorAll('[data-block-tool="entrance"], [data-block-tool="entrance-area"]').forEach(b => {
+      b.classList.toggle('floor-locked', upper);
+      b.disabled = upper;
+    });
+    if (upper && (currentBlockTool === 'entrance' || currentBlockTool === 'entrance-area')) {
+      currentBlockTool = 'circulation';
+      document.querySelectorAll('[data-block-tool]').forEach(b => b.classList.toggle('active', b.getAttribute('data-block-tool') === 'circulation'));
+    }
+    if (upper && currentTool === 'route') { currentTool = 'block'; try { refreshRouteUi(); } catch (e) {} }
+    const rc = document.getElementById('routeControls');
+    if (rc) rc.hidden = !(currentStep === 2 && !upper);
+    const fg = document.getElementById('fillGardenBtn');
+    if (fg) { fg.disabled = upper; fg.classList.toggle('floor-locked', upper); }
+  }
+
+  function renderFloorUi(notice) {
+    const jb = document.getElementById('floorJumpBtn');
+    if (jb) jb.textContent = `階数：${floorCount}階建て（作図中：${currentFloor}階）`;
+    const mk = (label, active, onclick) => `<button type="button" class="floor-btn${active ? ' active' : ''}" onclick="${onclick}">${label}</button>`;
+    const countBtns = [1, 2, 3].map(k => mk(`${k}階建て`, floorCount === k, `setFloorCount(${k})`)).join('');
+    const floorBtns = Array.from({ length: floorCount }, (_, i) => i + 1).map(k => mk(`${k}階`, currentFloor === k, `switchFloor(${k})`)).join('');
+    const body = document.getElementById('floorPanelBody');
+    if (body) {
+      body.innerHTML = `
+        <div class="floor-panel-title">🏠 階数の設定</div>
+        <div class="floor-row"><span class="floor-row-label">建物の階数</span><span class="floor-btns">${countBtns}</span></div>
+        <div class="floor-row"><span class="floor-row-label">作図する階</span><span class="floor-btns">${floorBtns}</span></div>
+        <p class="floor-hint">2階以上は、下の階の住宅ヴォリュームの範囲内に「住宅」を配置します（玄関・駐車・アプローチ・庭は1階で計画します）。ブロックプランも階ごとに作図し、階段を含む交通空間は上下階で重なる位置に配置してください。図は「① 配置計画」「② ブロックプラン」のどちらでも、図の上の階ボタンで切り替えられます。</p>
+        <div class="floor-notice" role="status"></div>`;
+    }
+    ['floorTabsStep1', 'floorTabsStep2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = `<span class="floor-tabs-label">作図する階</span>${floorBtns}`
+        + (floorCount === 1 ? '<span class="floor-tabs-note">2階以上を作図するには「階数」ボタンで階数を選びます</span>' : '')
+        + '<span class="floor-notice" role="status"></span>';
+    });
+    if (notice !== undefined) setFloorNotice(notice);
+  }
+
+  // 2階以上の配置計画の診断
+  function runDiagnosisUpper() {
+    isEvaluated = true;
+    const lowerG = floorStateGrid(currentFloor - 1);
+    let upCells = 0, over = 0, lowCells = countHouseCells(lowerG);
+    for (let fr = 0; fr < stateGrid.length; fr++) for (let fc = 0; fc < stateGrid[fr].length; fc++) {
+      if (!isVol(stateGrid[fr][fc])) continue;
+      upCells++;
+      if (!(lowerG && lowerG[fr] && isVol(lowerG[fr][fc]))) over++;
+    }
+    const m = c => (c / MASU_TO_FINE).toFixed(1);
+    const a = c => (c * FINE_CELL_AREA).toFixed(2);
+    let score = 100;
+    const items = [];
+    if (upCells === 0) {
+      items.push({ title: `${currentFloor}階の住宅ヴォリューム`, status: 'bad', text: `${currentFloor}階の住宅ヴォリュームが配置されていません。「住宅」を選び、${currentFloor - 1}階の範囲内に配置してください。` });
+      score -= 40;
+    } else {
+      items.push({ title: `${currentFloor}階の住宅ヴォリューム`, status: 'good', text: `${currentFloor}階の床面積は${m(upCells)}マス（${a(upCells)}㎡）です。` });
+    }
+    if (over > 0) {
+      items.push({ title: '下階との重なり', status: 'bad', text: `不適合：${currentFloor - 1}階の住宅ヴォリュームの外にはみ出している範囲が${m(over)}マスあります。` });
+      score -= 25;
+    } else if (upCells > 0) {
+      items.push({ title: '下階との重なり', status: 'good', text: `適合：${currentFloor}階はすべて${currentFloor - 1}階の住宅ヴォリュームの上に載っています。` });
+    }
+    if (upCells > 0 && lowCells > 0) {
+      const ratio = upCells / lowCells;
+      if (ratio < 0.3) {
+        items.push({ title: `${currentFloor - 1}階との面積比`, status: 'warn', text: `${currentFloor}階は${currentFloor - 1}階の${(ratio * 100).toFixed(0)}%です。かなり小さいため、構造や屋根形状、各階の用途配分を確認しましょう。` });
+        score -= 10;
+      } else {
+        items.push({ title: `${currentFloor - 1}階との面積比`, status: 'good', text: `${currentFloor}階は${currentFloor - 1}階の${(ratio * 100).toFixed(0)}%の面積です${ratio >= 0.9 ? '（総2階に近い形です）' : ''}。` });
+      }
+    }
+    const parts = [];
+    let total = 0;
+    for (let n = 1; n <= floorCount; n++) {
+      const c = countHouseCells(floorStateGrid(n));
+      total += c; parts.push(`${n}階 ${a(c)}㎡`);
+    }
+    // 階段・バルコニー・屋根
+    {
+      let stairs = 0, balcony = 0, roof = 0, balconyAttached = 0, uncovered = 0, stairOverlap = 0;
+      const lowerSt = floorStateGrid(currentFloor - 1);
+      const lowerStairs = lowerSt ? lowerSt.flat().filter(v => v === 'stairs').length : 0;
+      for (let fr = 0; fr < stateGrid.length; fr++) for (let fc = 0; fc < stateGrid[fr].length; fc++) {
+        const v = stateGrid[fr][fc];
+        if (v === 'stairs') { stairs++; if (lowerSt && lowerSt[fr][fc] === 'stairs') stairOverlap++; }
+        if (v === 'roof') roof++;
+        if (v === 'balcony') {
+          balcony++;
+          if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dr, dc]) => stateGrid[fr + dr] && isVol(stateGrid[fr + dr][fc + dc]))) balconyAttached++;
+        }
+        if (lowerG && lowerG[fr] && isVol(lowerG[fr][fc]) && v === null) uncovered++;
+      }
+      if (upCells > 0) {
+        const stairShift = (stairs - stairOverlap) + (lowerStairs - stairOverlap);
+        if (stairs === 0 && lowerStairs === 0) { items.push({ title: '階段', status: 'warn', text: `${currentFloor}階に階段が配置されていません。上下階をつなぐ階段を配置してください（目安：2マス以上）。` }); score -= 10; }
+        else if (lowerStairs > 0 && stairShift > 0) {
+          items.push({ title: '階段位置のずれ', status: 'bad', text: `不適合：${currentFloor}階の階段が${currentFloor - 1}階の階段と同じ位置にありません（位置が合っていないマスが${m(stairShift)}マス）。階段は上下階で同じ位置・同じ形に配置します。` });
+          score -= 20;
+        }
+        else if (lowerStairs === 0 && stairs > 0) { items.push({ title: '階段位置のずれ', status: 'bad', text: `不適合：${currentFloor}階に階段がありますが、${currentFloor - 1}階に階段がありません。${currentFloor - 1}階にも同じ位置に階段を配置してください。` }); score -= 20; }
+        else if (stairs < 2 * MASU_TO_FINE) { items.push({ title: '階段', status: 'warn', text: `階段は${m(stairs)}マスです。階段としての広さ（目安2マス以上）を確認しましょう。` }); score -= 5; }
+        else items.push({ title: '階段位置', status: 'good', text: `適合：階段が${currentFloor - 1}階と同じ位置に${m(stairs)}マス配置されています。` });
+      }
+      if (balcony > 0) {
+        if (balconyAttached === 0) { items.push({ title: 'バルコニー', status: 'warn', text: `バルコニー（${m(balcony)}マス）が住宅ヴォリュームに接していません。居室などから出入りできる位置に配置しましょう。` }); score -= 5; }
+        else items.push({ title: 'バルコニー', status: 'good', text: `バルコニー${m(balcony)}マス（${a(balcony)}㎡）が住宅に接して配置されています。床面積には含めていません。` });
+      }
+      if (lowerG && countHouseCells(lowerG) > 0 && upCells > 0) {
+        if (uncovered > 0) { items.push({ title: `${currentFloor - 1}階の上部`, status: 'warn', text: `${currentFloor - 1}階の上に、${currentFloor}階の住宅・バルコニー・${currentFloor - 1}階屋根のいずれも指定されていない範囲が${m(uncovered)}マスあります。屋根またはバルコニーを配置しましょう。` }); score -= 5; }
+        else items.push({ title: `${currentFloor - 1}階の上部`, status: 'good', text: `${currentFloor - 1}階の上部はすべて${currentFloor}階・バルコニー・屋根のいずれかで計画されています（${currentFloor - 1}階屋根${m(roof)}マス）。` });
+      }
+    }
+    { const farIt = farItem(); if (farIt) { items.push(farIt); if (farIt.status === 'bad') score -= 20; } }
+    items.push({ title: '延べ床面積', status: 'good', text: `延べ床面積は${a(total)}㎡です（${parts.join('＋')}）。` });
+    score = Math.max(0, Math.min(100, score));
+    document.getElementById('totalScore').innerText = `${score}`;
+    const rankEl = document.getElementById('scoreRank');
+    if (score >= 90) { rankEl.innerText = `Sランク (${currentFloor}階の配置は適切です)`; rankEl.style.color = 'var(--good)'; }
+    else if (score >= 75) { rankEl.innerText = `Aランク (良好な${currentFloor}階の配置)`; rankEl.style.color = 'var(--good)'; }
+    else if (score >= 60) { rankEl.innerText = 'Bランク (改善の余地あり)'; rankEl.style.color = 'var(--warn)'; }
+    else { rankEl.innerText = 'Cランク (再計画が必要です)'; rankEl.style.color = 'var(--bad)'; }
+    document.getElementById('evalItems').innerHTML = items.map(it => `
+      <div class="eval-item">
+        <div class="eval-title">
+          <span>${it.title}</span>
+          <span class="badge ${it.status}">${it.status === 'good' ? '適合' : it.status === 'warn' ? '注意' : '不適合'}</span>
+        </div>
+        <div style="color:#526375;">${it.text}</div>
+      </div>
+    `).join('');
+  }
+
+  // 2階以上のブロックプランの診断
+  function runBlockDiagnosisUpper() {
+    if (!blockGrid || !footprintMask) return;
+    const { counts, totalFootprint } = computeBlockCounts();
+    const filled = counts.circulation + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
+    const unassigned = totalFootprint - filled;
+    let score = 100;
+    const items = [];
+    if (totalFootprint === 0) {
+      items.push({ title: 'ブロック配置', status: 'bad', text: `${currentFloor}階の住宅ヴォリュームの範囲が見つかりません。①配置計画で${currentFloor}階を確認してください。` });
+      score -= 40;
+    } else {
+      const ratio = unassigned / totalFootprint;
+      if (ratio === 0) items.push({ title: '配置の網羅性', status: 'good', text: `${currentFloor}階の住宅ヴォリューム内のすべてのマスがブロックで塗り分けられています。` });
+      else if (ratio <= 0.1) { items.push({ title: '配置の網羅性', status: 'warn', text: `未配置のマスが${(ratio * 100).toFixed(0)}%残っています。` }); score -= 10; }
+      else { items.push({ title: '配置の網羅性', status: 'bad', text: `未配置のマスが${(ratio * 100).toFixed(0)}%あります。${currentFloor}階全体をブロックで塗り分けてください。` }); score -= 25; }
+    }
+    // 階段：この階の交通空間が、下階の交通空間と重なっているか
+    const lowerB = floorBlockGridOf(currentFloor - 1);
+    const lowerG = floorStateGrid(currentFloor - 1);
+    let overlap = 0;
+    if (lowerB) {
+      for (let fr = 0; fr < blockGridDims.rows; fr++) for (let fc = 0; fc < blockGridDims.cols; fc++) {
+        if (footprintMask[fr][fc] && blockGrid[fr][fc] === 'circulation' && lowerB[fr] && lowerB[fr][fc] === 'circulation' && lowerG && isVol(lowerG[fr][fc])) overlap++;
+      }
+    }
+    if (counts.circulation === 0) {
+      items.push({ title: '階段（上下階の交通空間）', status: 'bad', text: `${currentFloor}階に交通空間（階段・廊下）が配置されていません。階段は上下階で同じ位置に配置します。` });
+      score -= 20;
+    } else if (!lowerB) {
+      items.push({ title: '階段（上下階の交通空間）', status: 'warn', text: `${currentFloor - 1}階のブロックプランが未作成のため、階段の位置を確認できません。${currentFloor - 1}階のブロックプランも作図してください。` });
+      score -= 10;
+    } else if (overlap === 0) {
+      items.push({ title: '階段（上下階の交通空間）', status: 'bad', text: `不適合：${currentFloor}階の交通空間が${currentFloor - 1}階の交通空間と重なっていません。階段は上下階で同じ位置に配置してください（図の黄色の点線が${currentFloor - 1}階の交通空間です）。` });
+      score -= 25;
+    } else if (overlap < MASU_TO_FINE) {
+      items.push({ title: '階段（上下階の交通空間）', status: 'warn', text: `上下階で重なる交通空間は${(overlap / MASU_TO_FINE).toFixed(1)}マスです。階段として使える広さ（1マス以上）か確認しましょう。` });
+      score -= 10;
+    } else {
+      items.push({ title: '階段（上下階の交通空間）', status: 'good', text: `適合：${currentFloor - 1}階の交通空間と${(overlap / MASU_TO_FINE).toFixed(1)}マス重なっており、階段を通せます。` });
+    }
+    // 全階を通した6ブロックの使用
+    const total6 = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0 };
+    for (let n = 1; n <= floorCount; n++) {
+      const b = floorBlockGridOf(n), g = floorStateGrid(n);
+      if (!b || !g) continue;
+      for (let fr = 0; fr < b.length; fr++) for (let fc = 0; fc < b[fr].length; fc++) {
+        if (g[fr] && isVol(g[fr][fc]) && b[fr][fc] && total6[b[fr][fc]] !== undefined) total6[b[fr][fc]]++;
+      }
+    }
+    const names = { circulation: '交通空間', housework: '家事空間', wet: '生理衛生空間', common: '共同空間', private: '個人の空間', storage: '収納空間' };
+    const missing = Object.keys(total6).filter(k => total6[k] === 0).map(k => names[k]);
+    if (missing.length) {
+      items.push({ title: '全階を通した6ブロックの使用', status: 'warn', text: `1〜${floorCount}階を合わせて、${missing.join('・')}がまだ配置されていません。` });
+      score -= 5 * missing.length;
+    } else {
+      items.push({ title: '全階を通した6ブロックの使用', status: 'good', text: `1〜${floorCount}階を合わせて、6つの空間がすべて計画に含まれています。` });
+    }
+    items.push({ title: '診断の範囲', status: 'good', text: `${currentFloor}階では、玄関・駐車・日当たり・動線の診断は行いません（1階のブロックプランで診断します）。` });
+    score = Math.max(0, Math.min(100, score));
+    document.getElementById('blockTotalScore').innerText = `${score}`;
+    const rankEl = document.getElementById('blockScoreRank');
+    if (score >= 90) { rankEl.innerText = `Sランク（理想的な${currentFloor}階のゾーニング）`; rankEl.style.color = 'var(--good)'; }
+    else if (score >= 75) { rankEl.innerText = `Aランク（良好な${currentFloor}階のゾーニング）`; rankEl.style.color = 'var(--good)'; }
+    else if (score >= 60) { rankEl.innerText = 'Bランク（改善の余地あり）'; rankEl.style.color = 'var(--warn)'; }
+    else { rankEl.innerText = 'Cランク（再計画が必要です）'; rankEl.style.color = 'var(--bad)'; }
+    document.getElementById('blockEvalItems').innerHTML = items.map(it => `
+      <div class="eval-item">
+        <div class="eval-title">
+          <span>${it.title}</span>
+          <span class="badge ${it.status}">${it.status === 'good' ? '適合' : it.status === 'warn' ? '注意' : '不適合'}</span>
+        </div>
+        <div style="color:#526375;">${it.text}</div>
+      </div>
+    `).join('');
+    renderBlockAll();
+  }
+
+  // ブロックプラン図：階の表示、下階の外形（淡色）と下階の交通空間（黄色の点線）
+  function renderFloorGuide(svg, minFR, minFC, width, height) {
+    const g = document.createElementNS(SVG_NS, 'g');
+    g.style.pointerEvents = 'none';
+    if (currentFloor > 1) {
+      const lowerG = floorStateGrid(currentFloor - 1), lowerB = floorBlockGridOf(currentFloor - 1);
+      if (lowerG) {
+        for (let fr = 0; fr < lowerG.length; fr++) for (let fc = 0; fc < lowerG[fr].length; fc++) {
+          if (!isVol(lowerG[fr][fc])) continue;
+          const x = BMARGIN + (fc - minFC) * BFINE, y = BMARGIN + (fr - minFR) * BFINE;
+          if (!footprintMask[fr][fc]) {
+            const v = lowerB && lowerB[fr] ? lowerB[fr][fc] : null;
+            bsvg('rect', { x, y, width: BFINE, height: BFINE, fill: v ? ZONE_COLORS[v] : '#9FB3C8', 'fill-opacity': 0.3 }, g);
+          } else if (lowerB && lowerB[fr] && lowerB[fr][fc] === 'circulation') {
+            bsvg('rect', { x: x + 1.5, y: y + 1.5, width: BFINE - 3, height: BFINE - 3, fill: 'none', stroke: '#FFD27A', 'stroke-width': 1.6, 'stroke-dasharray': '3,2' }, g);
+          }
+        }
+      }
+      bsvg('text', { x: 8, y: height - 8, fill: '#FFD27A', 'font-size': 10 }, g, `淡色＝${currentFloor - 1}階の外形　黄色の点線＝${currentFloor - 1}階の交通空間（階段位置の目安）`);
+    }
+    if (floorCount > 1) {
+      for (let fr = 0; fr < stateGrid.length; fr++) for (let fc = 0; fc < stateGrid[fr].length; fc++) {
+        if (stateGrid[fr][fc] !== 'stairs') continue;
+        bsvg('rect', { x: BMARGIN + (fc - minFC) * BFINE + 1.5, y: BMARGIN + (fr - minFR) * BFINE + 1.5, width: BFINE - 3, height: BFINE - 3, fill: 'none', stroke: '#7FD1FF', 'stroke-width': 1.6, 'stroke-dasharray': '2,2' }, g);
+      }
+    }
+    if (floorCount > 1) bsvg('text', { x: 10, y: 34, fill: '#FFD37A', 'font-size': 13, 'font-weight': 'bold' }, g, `${currentFloor}階 ブロックプラン`);
+    svg.appendChild(g);
+  }
+
+  function collectUpperFloorsForExport() {
+    stashCurrentFloor();
+    const out = [];
+    for (let n = 2; n <= floorCount; n++) {
+      const d = floorStore[n];
+      if (!d || !Array.isArray(d.stateGrid)) continue;
+      out.push(JSON.parse(JSON.stringify({ floor: n, stateGrid: d.stateGrid, blockGrid: d.blockGrid || null, blockGridDims: d.blockGridDims || { rows: 0, cols: 0 }, routes: d.routes || { life: [], chore: [] } })));
+    }
+    return out;
+  }
+
   function setDrawingStatus(message, kind = '') {
     ['drawingSaveStatus', 'blockDrawingSaveStatus'].forEach(id => {
       const el = document.getElementById(id);
@@ -1607,7 +2107,8 @@
       const safePoints = (list) => Array.isArray(list) ? list.filter(p => Number.isInteger(p?.fr) && Number.isInteger(p?.fc)).map(p => ({ fr: p.fr, fc: p.fc })) : [];
       const safeRoutes = (list, type) => Array.isArray(list) ? list.map(points => ({ type, points: safePoints(points) })).filter(route => route.points.length > 0) : [];
       const exportedAt = new Date().toISOString();
-      const exportData = {
+      const upperFloorsData = collectUpperFloorsForExport();
+      const exportData = runOnFloor(1, () => ({
         export_version: 3,
         current_step: currentStep,
         exported_at: exportedAt,
@@ -1617,7 +2118,10 @@
         routes: { life: safeRoutes(routes?.life, 'life'), chore: safeRoutes(routes?.chore, 'chore') },
         diagnosis_settings: { targetBCR, targetParkingPerpendicular, targetParkingParallel, targetParkingTandem, paintGranularity, paintMode, blockPaintMode, blockPaintGranularity },
         drawing: { ...JSON.parse(JSON.stringify({ currentPattern, roadWidthS, roadWidthN, roadWidthE, roadWidthW, targetBCR, targetParkingPerpendicular, targetParkingParallel, targetParkingTandem, cols, rows, flagW, flagH, poleW, poleX, poleH, paintGranularity, paintMode, zoneGrid, stateGrid, entrance, entranceDir, entranceArea, cars, routes: { life: safeRoutes(routes?.life, 'life').map(r => r.points), chore: safeRoutes(routes?.chore, 'chore').map(r => r.points) }, blockGrid, blockGridDims, blockPaintMode, blockPaintGranularity })), currentStep }
-      };
+      }));
+      exportData.target_far = targetFAR;
+      exportData.diagnosis_settings.targetFAR = targetFAR;
+      exportData.floors = { count: floorCount, current: currentFloor, upper: upperFloorsData };
       json = JSON.stringify(exportData, null, 2);
       const now = new Date();
       const pad = value => String(value).padStart(2, '0');
@@ -1671,11 +2175,27 @@
       setDrawingStatus('JSONを確認中…');
       try {
         const raw = await file.text();
-        const s = JSON.parse(raw).drawing || JSON.parse(raw);
+        const rootJson = JSON.parse(raw);
+        const s = rootJson.drawing || rootJson;
         const required = ['zoneGrid', 'stateGrid', 'routes'];
         if (required.some(key => !(key in s))) throw new Error('必要な作図データが含まれていません。');
         if (!Array.isArray(s.zoneGrid) || !Array.isArray(s.stateGrid) || !s.routes || !Array.isArray(s.routes.life) || !Array.isArray(s.routes.chore)) throw new Error('作図データの形式が不正です。');
         const next = JSON.parse(JSON.stringify(s));
+        { const tf = Number(rootJson.target_far ?? rootJson.diagnosis_settings?.targetFAR); setTargetFAR(FAR_VALUES.includes(tf) ? tf : 100); }
+        // 階数データの復元（階数のない旧形式のファイルは1階建てとして読み込む）
+        currentFloor = 1;
+        Object.keys(floorStore).forEach(k => delete floorStore[k]);
+        const fl = rootJson.floors;
+        floorCount = fl && Number.isInteger(fl.count) ? Math.max(1, Math.min(MAX_FLOORS, fl.count)) : 1;
+        if (fl && Array.isArray(fl.upper)) {
+          fl.upper.forEach(u => {
+            const okDims = u && Array.isArray(u.stateGrid) && u.stateGrid.length === next.rows * 2 && Array.isArray(u.stateGrid[0]) && u.stateGrid[0].length === next.cols * 2;
+            if (okDims && Number.isInteger(u.floor) && u.floor >= 2 && u.floor <= floorCount) {
+              floorStore[u.floor] = { stateGrid: u.stateGrid, blockGrid: Array.isArray(u.blockGrid) ? u.blockGrid : null, blockGridDims: u.blockGridDims || { rows: 0, cols: 0 },
+                routes: (u.routes && Array.isArray(u.routes.life) && Array.isArray(u.routes.chore)) ? u.routes : { life: [], chore: [] } };
+            }
+          });
+        }
         currentPattern=next.currentPattern; roadWidthS=next.roadWidthS; roadWidthN=next.roadWidthN; roadWidthE=next.roadWidthE; roadWidthW=next.roadWidthW; targetBCR=next.targetBCR;
         targetParkingPerpendicular=next.targetParkingPerpendicular; targetParkingParallel=next.targetParkingParallel; targetParkingTandem=next.targetParkingTandem;
         cols=next.cols; rows=next.rows; flagW=next.flagW; flagH=next.flagH; poleW=next.poleW; poleX=next.poleX; poleH=next.poleH; paintGranularity=next.paintGranularity; paintMode=next.paintMode;
@@ -1683,10 +2203,11 @@
         blockGrid=next.blockGrid || null; blockGridDims=next.blockGridDims || {rows:0,cols:0}; blockPaintMode=next.blockPaintMode || 'cell'; blockPaintGranularity=next.blockPaintGranularity || 'full';
         entranceArea = Array.isArray(next.entranceArea) ? next.entranceArea.map(p => Number.isInteger(p?.r) && Number.isInteger(p?.c) ? (p.f ? { r: p.r, c: p.c, f: 1 } : { r: p.r, c: p.c }) : { r: Math.floor((p?.fr || 0) / 2), c: Math.floor((p?.fc || 0) / 2) }) : [];
         resetSnapshot=null; historyStack=[]; pushHistory(); updateBrief(); renderAll(); invalidateDiagnosis();
-if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house')); }
+if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
         const wantStep2 = !!blockGrid && (next.currentStep === 2 || next.currentStep === undefined);
         if (wantStep2) { goToStep(2); renderBlockAll(); updateBlockComposition(); invalidateBlockDiagnosis(); }
         else if (currentStep === 2) { goToStep(1); }
+        applyFloorUiState(); renderFloorUi('');
         setDrawingStatus(`読み込みました（${file.name}）`, 'success');
       } catch (error) {
         setDrawingStatus(`読み込みに失敗しました：${error.message || 'JSONを確認してください。'} 現在の作図内容は変更されていません。`, 'error');
@@ -1962,6 +2483,15 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
         blockTools.appendChild(routeControls);
       }
     }
+    [['blueprintSvg', 'floorTabsStep1'], ['blockSvg', 'floorTabsStep2']].forEach(([svgId, tabId]) => {
+      const stage = document.getElementById(svgId)?.closest('.stage-container');
+      if (stage && !document.getElementById(tabId)) {
+        const bar = document.createElement('div');
+        bar.id = tabId; bar.className = 'floor-tabs';
+        stage.insertBefore(bar, stage.firstChild);
+      }
+    });
+    renderFloorUi();
     if (patternTabs && roadPanel) {
       roadPanel.insertBefore(patternTabs, roadPanel.firstChild);
     }
@@ -2184,6 +2714,11 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     if (zoneGrid[r][c] !== 'site') return;
     if (isSetbackCell(r, c) || isCornerCutCell(r, c)) return;
 
+    if (currentFloor > 1) {
+      if (!UPPER_TOOLS.includes(currentTool)) { setFloorNotice('2階以上では、住宅・階段・バルコニー・屋根・消しゴムだけ使えます。'); return; }
+      if (currentTool !== 'eraser' && !upperPaintOk(currentTool, fr, fc)) { setFloorNotice(upperToolNotice(currentTool)); return; }
+    }
+    if (currentTool === 'stairs') { setFloorNotice('階段はセル単位で配置してください（バケツは使えません）。'); return; }
     const isEraser = currentTool === 'eraser';
     const clickedValue = stateGrid[fr][fc];
     if (isEraser) {
@@ -2210,6 +2745,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
         if (zoneGrid[nr][nc] !== 'site') return;
         if (isSetbackCell(nr, nc) || isCornerCutCell(nr, nc)) return;
         if (visited[nfr][nfc]) return;
+        if (currentFloor > 1 && !isEraser && !upperPaintOk(currentTool, nfr, nfc)) return;
         if (stateGrid[nfr][nfc] !== matchValue) return;
         visited[nfr][nfc] = true;
         stack.push([nfr, nfc]);
@@ -2350,6 +2886,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
   }
 
   function updateBCRMeterOnly() {
+    if (currentFloor > 1) { runOnFloor(1, updateBCRMeterOnly); return; }
     let houseCount = 0;
     let siteCount = 0;
 
@@ -2357,13 +2894,14 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
       for (let c = 0; c < cols; c++) {
         if (zoneGrid[r][c] === 'site' && !isSetbackCell(r, c) && !isCornerCutCell(r, c)) {
           siteCount++;
-          if (csAt(r, c) === 'house') houseCount++;
+          if (isVol(csAt(r, c))) houseCount++;
         }
       }
     }
 
     const bcr = siteCount > 0 ? (houseCount / siteCount) * 100 : 0;
     document.getElementById('bcrValue').innerText = `${bcr.toFixed(1)}%`;
+    updateFARMeter();
     const bcrMeter = document.getElementById('bcrMeter');
     if (bcr > targetBCR) {
       bcrMeter.classList.add('over');
@@ -2468,6 +3006,9 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
   }
 
   function resetGrid(saveBefore = false) {
+    // 敷地条件を変えると全階のグリッドが作り直されるため、1階へ戻して上階のデータを破棄する
+    if (currentFloor !== 1) { stashCurrentFloor(); loadFloorToGlobals(1); }
+    Object.keys(floorStore).forEach(k => { if (Number(k) > 1) delete floorStore[k]; });
     if (saveBefore) captureResetSnapshot();
     if (currentPattern === 'flag') {
       cols = flagW;
@@ -2499,6 +3040,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     updateBrief();
     renderAll();
     invalidateDiagnosis();
+    if (document.getElementById('floorPanelBody')) { applyFloorUiState(); renderFloorUi(); }
   }
 
   function adjustDimension(type, delta) {
@@ -2553,7 +3095,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     const parkCondText = parkCondStr.length > 0 ? parkCondStr.join('・') : '設定なし';
 
     const briefEl = document.getElementById('briefText');
-    briefEl.innerHTML = `敷地条件: <b>${patNames[currentPattern]} (幅員${roadWidthLabel()})</b> | 指定建蔽率: <b>${targetBCR}%</b> | 駐車条件: <b>${parkCondText}</b> | モジュール: <b>910mm</b>`;
+    briefEl.innerHTML = `敷地条件: <b>${patNames[currentPattern]} (幅員${roadWidthLabel()})</b> | 階数: <b>${floorCount}階建て（作図中${currentFloor}階）</b> | 指定建蔽率: <b>${targetBCR}%</b> | 指定容積率: <b>${targetFAR}%（適用上限${farLimitInfo().applied}%）</b> | 駐車条件: <b>${parkCondText}</b> | モジュール: <b>910mm</b>`;
   }
 
   // 現在のパターンで接している道路の方位と幅員をまとめたラベルを返す (例: "南6m" や "南6m・東4m")
@@ -2714,12 +3256,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
             fineCellsOf(r, c).forEach(([fr, fc]) => {
               const fx = MARGIN + fc * HALF;
               const fy = MARGIN + fr * HALF;
-              const st = stateGrid[fr][fc];
-              let fill = '#1A385C';
-              if (st === 'house') fill = '#F5EFE0';
-              else if (st === 'parking') fill = '#9EA6B2';
-              else if (st === 'garden') fill = '#6BA875';
-              else if (st === 'approach') fill = '#E5B25D';
+              const fill = siteCellFill(fr, fc);
 
               const fineRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
               fineRect.setAttribute('id', `cell-${fr}-${fc}`);
@@ -2812,6 +3349,15 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     }
 
     renderAnnotations(svg);
+
+    if (floorCount > 1) {
+      const lab = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      lab.setAttribute('x', 8); lab.setAttribute('y', 18); lab.setAttribute('fill', '#FFD37A');
+      lab.setAttribute('font-size', '13'); lab.setAttribute('font-weight', 'bold');
+      lab.style.pointerEvents = 'none';
+      lab.textContent = currentFloor > 1 ? `${currentFloor}階 配置計画（淡色＝下階・1階の外構）` : '1階 配置計画';
+      svg.appendChild(lab);
+    }
 
     // 配置要素の追加・削除・移動・変更後も、表示中の構成比を常に最新状態へ同期する。
     // ブロックプランへ遷移していない場合は updateBlockStats() 側で安全に無視する。
@@ -3125,6 +3671,11 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     if (zoneGrid[r][c] !== 'site') return;
     if (isSetbackCell(r, c) || isCornerCutCell(r, c)) return;
 
+    if (currentFloor > 1 && !UPPER_TOOLS.includes(currentTool)) {
+      setFloorNotice('2階以上では、住宅・階段・バルコニー・屋根・消しゴムだけ使えます。玄関・駐車・アプローチ・庭は1階で計画します。');
+      return;
+    }
+
     if (currentTool === 'entrance') {
       // 配置時も診断時と同じ向き補正済みのアプローチセルを判定に使う。
       const previousEntrance = entrance;
@@ -3146,7 +3697,11 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     // 自動車ツールは startCarInteraction/updateCarInteraction/finishCarInteraction で
     // ドラッグ移動とクリック回転を専用に処理するため、ここでは扱わない
 
-    const targetFineCells = (paintGranularity === 'half') ? [[fr, fc]] : fineCellsOf(r, c);
+    let targetFineCells = (paintGranularity === 'half') ? [[fr, fc]] : fineCellsOf(r, c);
+    if (currentFloor > 1 && currentTool !== 'eraser') {
+      targetFineCells = targetFineCells.filter(([a, b]) => upperPaintOk(currentTool, a, b));
+      if (!targetFineCells.length) { setFloorNotice(upperToolNotice(currentTool)); return; }
+    }
 
     if (currentTool === 'eraser') {
       // 玄関は0.5マス単位で配置されるため、同じ0.5マスをクリックした場合のみ削除する。
@@ -3191,13 +3746,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     targetFineCells.forEach(([ffr, ffc]) => {
       const cellEl = document.getElementById(`cell-${ffr}-${ffc}`);
       if (cellEl) {
-        let fill = '#1A385C';
-        const st = stateGrid[ffr][ffc];
-        if (st === 'house') fill = '#F5EFE0';
-        else if (st === 'parking') fill = '#9EA6B2';
-        else if (st === 'garden') fill = '#6BA875';
-        else if (st === 'approach') fill = '#E5B25D';
-        cellEl.setAttribute('fill', fill);
+        cellEl.setAttribute('fill', siteCellFill(ffr, ffc));
       }
     });
   }
@@ -3233,7 +3782,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
         if (zoneGrid[r][c] === 'site' && !isSetbackCell(r, c) && !isCornerCutCell(r, c)) {
           siteCount++;
           const st = csAt(r, c);
-          if (st === 'house') houseCount++;
+          if (isVol(st)) houseCount++;
           else if (st === 'garden') gardenCount++;
           else if (st === 'parking') parkingCount++;
           else if (st === 'approach') approachCount++;
@@ -3243,6 +3792,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
 
     const bcr = siteCount > 0 ? (houseCount / siteCount) * 100 : 0;
     document.getElementById('bcrValue').innerText = `${bcr.toFixed(1)}%`;
+    updateFARMeter();
     const bcrMeter = document.getElementById('bcrMeter');
     if (bcr > targetBCR) {
       bcrMeter.classList.add('over');
@@ -3277,11 +3827,32 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
       }
     }
 
+    { const farIt = farItem(); if (farIt) { items.push(farIt); if (farIt.status === 'bad') score -= 20; } }
+
+    if (floorCount > 1) {
+      let stairsN = 0;
+      for (const row of stateGrid) for (const v of row) if (v === 'stairs') stairsN++;
+      const stM = stairsN / MASU_TO_FINE;
+      if (stairsN === 0) { items.push({ title: '階段', status: 'warn', text: `${floorCount}階建てですが、1階に階段が配置されていません。「階段」を選んで配置してください（目安：2マス以上）。階段は住宅ヴォリュームの一部として扱います。` }); score -= 10; }
+      else if (stM < 2) { items.push({ title: '階段', status: 'warn', text: `階段は${stM.toFixed(1)}マスです。階段としての広さ（目安2マス以上）を確認しましょう。` }); score -= 5; }
+      else items.push({ title: '階段', status: 'good', text: `1階に階段が${stM.toFixed(1)}マス配置されています。上の階でも同じ位置に階段を配置してください。` });
+      const up = floorStore[2] && floorStore[2].stateGrid;
+      if (up && stairsN > 0) {
+        let both = 0, upN = 0;
+        for (let fr = 0; fr < stateGrid.length; fr++) for (let fc = 0; fc < stateGrid[fr].length; fc++) {
+          if (up[fr][fc] === 'stairs') { upN++; if (stateGrid[fr][fc] === 'stairs') both++; }
+        }
+        const shiftM = ((stairsN - both) + (upN - both)) / MASU_TO_FINE;
+        if (upN > 0 && shiftM > 0) { items.push({ title: '階段位置のずれ', status: 'bad', text: `不適合：1階と2階の階段が同じ位置にありません（位置が合っていないマスが${shiftM.toFixed(1)}マス）。階段は上下階で同じ位置・同じ形に配置します。` }); score -= 20; }
+        else if (upN > 0) items.push({ title: '階段位置', status: 'good', text: '適合：1階と2階の階段が同じ位置に配置されています。' });
+      }
+    }
+
     // 2. 住宅ヴォリュームの配置（各直交方向で境界線から1マス以上離隔）
     // 住宅の各外周セルから、同じ行・列上の最寄りの隣地境界線または道路境界線までを
     // 方向ごとに測定する。斜め方向は考慮せず、実際に存在する境界線だけを判定対象にする。
     const houseBoundaryDistances = { top: Infinity, bottom: Infinity, left: Infinity, right: Infinity };
-    const isHouseAt = (r, c) => r >= 0 && r < rows && c >= 0 && c < cols && csAt(r, c) === 'house';
+    const isHouseAt = (r, c) => r >= 0 && r < rows && c >= 0 && c < cols && isVol(csAt(r, c));
     const hasBoundaryAt = (r, c) => {
       if (r < 0 || r >= rows || c < 0 || c >= cols) return true;
       return zoneGrid[r][c] !== 'site' || isSetbackCell(r, c) || isCornerCutCell(r, c);
@@ -3345,7 +3916,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
       if (!Number.isFinite(frRaw) || !Number.isFinite(fcRaw) || !Array.isArray(stateGrid)) return null;
       const houseCells = [];
       for (let fr = 0; fr < fineRows; fr++) for (let fc = 0; fc < fineCols; fc++) {
-        if (stateGrid[fr]?.[fc] === 'house') houseCells.push([fr, fc]);
+        if (isVol(stateGrid[fr]?.[fc])) houseCells.push([fr, fc]);
       }
       if (!houseCells.length) return null;
       const fr = Math.round(frRaw), fc = Math.round(fcRaw);
@@ -3374,7 +3945,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
       const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
       for (let [dr, dc] of dirs) {
         const nr = er + dr, nc = ec + dc;
-        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && csAt(nr, nc) === 'house') {
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && isVol(csAt(nr, nc))) {
           adjHouse = true; break;
         }
       }
@@ -3672,7 +4243,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
       for (let c = 0; c < cols; c++) {
         let colMaxR = -1;
         for (let r = 0; r < rows; r++) {
-          if (csAt(r, c) === 'house') {
+          if (isVol(csAt(r, c))) {
             colMaxR = r;
           }
         }
@@ -3713,7 +4284,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     // 入隅が2つまで(矩形・L字型・コの字/Z型など)は減点対象とせず、3つ以上になった場合に評価を下げる。
     if (houseCount > 0) {
       const fineRows = rows * 2, fineCols = cols * 2;
-      const isHouseCell = (r, c) => r >= 0 && r < fineRows && c >= 0 && c < fineCols && stateGrid[r][c] === 'house';
+      const isHouseCell = (r, c) => r >= 0 && r < fineRows && c >= 0 && c < fineCols && isVol(stateGrid[r][c]);
       let concaveCorners = 0;
       for (let vr = 0; vr <= fineRows; vr++) {
         for (let vc = 0; vc <= fineCols; vc++) {
@@ -3770,7 +4341,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
     if (rankEl) rankEl.innerText = '診断中…';
     if (itemsEl) itemsEl.innerHTML = '<div style="text-align:center; color:#526375; font-size:12px; padding:20px 0;">現在の配置を診断しています…</div>';
     try {
-      runDiagnosisCore();
+      if (currentFloor > 1) runDiagnosisUpper(); else runDiagnosisCore();
     } catch (error) {
       isEvaluated = false;
       if (rankEl) rankEl.innerText = '診断を完了できませんでした';
@@ -3840,7 +4411,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
       zoneGrid[r][c] === 'site' &&
       !isSetbackCell(r, c) &&
       !isCornerCutCell(r, c) &&
-      csAt(r, c) !== 'house';
+      !isVol(csAt(r, c));
 
     const dist = Array(rows).fill(null).map(() => Array(cols).fill(Infinity));
     const queue = [];
@@ -3910,6 +4481,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => v === 'house'))
 
   // --- ✨ ANTHROPIC CLAUDE API LLM INTEGRATION ---
   async function requestAiAdvice() {
+    if (currentFloor > 1) { runDiagnosis(); setFloorNotice('✨ AI診断は1階の計画が対象です。1階に切り替えて実行してください。'); return; }
     runDiagnosis(); // First calculate base diagnosis
 
     const activeKey = customApiKey || "";
@@ -4189,7 +4761,7 @@ ${currentReport}
       for (let fr = 0; fr < newRows; fr++) {
         const row = [];
         for (let fc = 0; fc < newCols; fc++) {
-          const isHouse = stateGrid[fr][fc] === 'house';
+          const isHouse = isVol(stateGrid[fr][fc]);
           if (isHouse) hasHouse = true;
           row.push(isHouse);
         }
@@ -4266,6 +4838,11 @@ ${currentReport}
     }
   }
   window.goToStep = goToStep;
+  (function () {
+    const base = goToStep;
+    goToStep = function (n) { const r = base(n); applyFloorUiState(); renderFloorUi(); return r; };
+    window.goToStep = goToStep;
+  })();
 
   function selectBlockTool(tool, btnEl) {
     currentBlockTool = tool;
@@ -4650,10 +5227,11 @@ ${currentReport}
       if (!blockSiteCell(fr, fc)) continue;
       bsvg('rect', { x: X(fc), y: Y(fr), width: BFINE, height: BFINE, fill: '#1D4068' }, g);
     }
-    // アプローチ（配置計画で配置した範囲。玄関はこの範囲内で再配置できる）
+    // アプローチ（配置計画で配置した範囲。玄関はこの範囲内で再配置できる）。2階以上では1階の外構を表示する。
+    const sg = (currentFloor > 1 && floorStore[1] && floorStore[1].stateGrid) ? floorStore[1].stateGrid : stateGrid;
     let ap = null;
     for (let fr = 0; fr < fRows; fr++) for (let fc = 0; fc < fCols; fc++) {
-      if (!stateGrid[fr] || stateGrid[fr][fc] !== 'approach') continue;
+      if (!sg[fr] || sg[fr][fc] !== 'approach') continue;
       bsvg('rect', { x: X(fc), y: Y(fr), width: BFINE, height: BFINE, fill: '#E5B25D', 'fill-opacity': 0.85 }, g);
       if (!ap) ap = { fr, fc };
     }
@@ -4661,7 +5239,7 @@ ${currentReport}
     // 駐車スペース
     let pk = null;
     for (let fr = 0; fr < fRows; fr++) for (let fc = 0; fc < fCols; fc++) {
-      if (!stateGrid[fr] || stateGrid[fr][fc] !== 'parking') continue;
+      if (!sg[fr] || sg[fr][fc] !== 'parking') continue;
       bsvg('rect', { x: X(fc), y: Y(fr), width: BFINE, height: BFINE, fill: 'rgba(168,176,189,0.55)' }, g);
       if (!pk) pk = { fr, fc };
     }
@@ -4728,7 +5306,7 @@ ${currentReport}
     }
     // 駐車場の自動車
     const K = 2 * BFINE; // 配置計画の1マス(CELL)に相当するピクセル数
-    cars.forEach(car => {
+    (currentFloor > 1 ? ((floorStore[1] && floorStore[1].extra && floorStore[1].extra.cars) || []) : cars).forEach(car => {
       const { wCols, hRows } = getCarFootprint(car.dir);
       const cx = X(car.fc) + wCols * BFINE / 2, cy = Y(car.fr) + hRows * BFINE / 2;
       const w = CAR_DEPTH_CELLS * K - 8, h = CAR_WIDTH_CELLS * K - 8;
@@ -4796,6 +5374,7 @@ ${currentReport}
       }
     }
     svg.appendChild(gGrid);
+    renderFloorGuide(svg, minFR, minFC, width, height);
 
     // グリッド線: 内部は薄い線、住宅ヴォリュームの輪郭は太い白線で描く
     const gLines = document.createElementNS(SVG_NS, 'g');
@@ -5056,7 +5635,7 @@ ${currentReport}
     if (volumeEl) volumeEl.innerHTML = `住宅ヴォリューム: ${totalMasu}マス (${totalArea}㎡)`;
     const totalHtml = `
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:2px 0 6px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.12); font-weight:bold;">
-        <span>住宅ヴォリューム合計</span>
+        <span>${currentFloor > 1 ? currentFloor + '階 ' : ''}住宅ヴォリューム合計</span>
         <span style="font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;">${totalMasu}マス (${totalArea}㎡)</span>
       </div>`;
 
@@ -5089,10 +5668,11 @@ ${currentReport}
       const ratio = pctBase > 0 ? (cnt / pctBase) : 0; // 適正範囲判定・バー上の目安表示に用いる比率(filled基準)
       const area = (cnt * FINE_CELL_AREA).toFixed(2);
       const masu = (cnt / MASU_TO_FINE).toFixed(1);
-      const target = computeTargetMasuText(key, totalFootprint);
+      const isUpperFloor = currentFloor > 1;
+      const target = isUpperFloor ? '' : computeTargetMasuText(key, totalFootprint);
 
-      const [lo, hi] = RANGE_DEFS[key] || [0, 1];
-      const status = filled > 0 ? getRangeStatus(ratio, lo, hi) : null;
+      const [lo, hi] = isUpperFloor ? [0, 0] : (RANGE_DEFS[key] || [0, 1]);
+      const status = (filled > 0 && !isUpperFloor) ? getRangeStatus(ratio, lo, hi) : null;
       const icon = status ? `<span style="color:${STATUS_COLOR[status]}; font-weight:bold; margin-left:5px;">${STATUS_ICON[status]}</span>` : '';
 
       const loPct = Math.max(0, Math.min(100, lo * 100));
@@ -5215,6 +5795,7 @@ ${currentReport}
 
   function runBlockDiagnosis() {
     if (!blockGrid || !footprintMask) return;
+    if (currentFloor > 1) { runBlockDiagnosisUpper(); return; }
     const { counts, totalFootprint } = computeBlockCounts();
     const filled = counts.circulation + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
     const unassigned = totalFootprint - filled;
@@ -5711,6 +6292,7 @@ ${currentReport}
 
   // ✨ ブロックプラン用 Claude AI アドバイス
   async function requestBlockAiAdvice() {
+    if (currentFloor > 1) { runBlockDiagnosis(); setFloorNotice('✨ AI診断は1階の計画が対象です。1階に切り替えて実行してください。'); return; }
     runBlockDiagnosis();
 
     const activeKey = customApiKey || "";
