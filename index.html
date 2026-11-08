@@ -407,7 +407,7 @@
    <header class="top" data-html-import-id="html-import-3">
     <div class="title-block" data-html-import-id="html-import-4">
      <div class="flex items-center gap-2" data-html-import-id="html-import-5">
-      <h1 data-html-import-id="html-import-6" data-template-id="h1-0" class="canva-text canva-text" style="color: rgb(11, 27, 45); font-weight: 700; font-style: normal; font-size: 22px;">住宅配置計画トレーニング</h1><span data-template-id="span-1" class="canva-text canva-text" style="font-size: 10px; color: rgb(82, 99, 117); white-space: nowrap; font-weight: 400; font-style: normal;" data-html-import-id="html-import-7">更新版（2026年11月4日更新）</span>
+      <h1 data-html-import-id="html-import-6" data-template-id="h1-0" class="canva-text canva-text" style="color: rgb(11, 27, 45); font-weight: 700; font-style: normal; font-size: 22px;">住宅配置計画トレーニング</h1><span data-template-id="span-1" class="canva-text canva-text" style="font-size: 10px; color: rgb(82, 99, 117); white-space: nowrap; font-weight: 400; font-style: normal;" data-html-import-id="html-import-7">更新版（2026年11月6日更新）</span>
      </div>
      <p data-html-import-id="html-import-8" data-template-id="p-2" class="canva-text canva-text" style="color: rgb(82, 99, 117); font-weight: 400; font-style: normal; font-size: 12px;">モジュール: 1マス = 910mm × 910mm (0.8281㎡) | 配置・接道・境界計画の総合評価</p>
     </div>
@@ -599,7 +599,7 @@
       </div>
       <div class="drawing-save-panel canva-container" data-template-id="div-124" style="background: rgb(248, 250, 252);" data-html-import-id="html-import-170">
        <div class="drawing-save-actions" data-html-import-id="html-import-171">
-        <button type="button" onclick="loadDrawing()" class="drawing-load-btn canva-button canva-button" data-template-id="button-125" style="background: rgb(255, 255, 255); color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 11px;" data-html-import-id="html-import-172">保存データを読み込む</button> <button type="button" onclick="downloadDrawingJson(event)" class="drawing-load-btn canva-button canva-button" data-template-id="button-126" style="background: rgb(255, 255, 255); color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 11px;" data-html-import-id="html-import-173">図面をダウンロード</button> <input id="drawingFileInput" type="file" accept="application/json,.json" hidden data-html-import-id="html-import-174" data-template-id="input-127" class="canva-input">
+        <button type="button" onclick="loadDrawing()" class="drawing-load-btn canva-button canva-button" data-template-id="button-125" style="background: rgb(255, 255, 255); color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 11px;" data-html-import-id="html-import-172">開く</button> <button type="button" onclick="downloadDrawingJson(event)" class="drawing-load-btn canva-button canva-button" data-template-id="button-126" style="background: rgb(255, 255, 255); color: rgb(19, 42, 69); font-weight: 700; font-style: normal; font-size: 11px;" data-html-import-id="html-import-173">保存</button> <input id="drawingFileInput" type="file" accept="application/json,.json" hidden data-html-import-id="html-import-174" data-template-id="input-127" class="canva-input">
        </div>
        <div id="drawingSaveStatus" class="drawing-save-status canva-container" role="status" aria-live="polite" data-template-id="div-128" style="color: rgb(82, 99, 117); font-size: 10px;" data-html-import-id="html-import-175">
         保存データはありません
@@ -1590,6 +1590,186 @@
   let routeGesture = null;     // 押下中の操作 { confirmOnUp: boolean }
   let routeLastAction = { t: 0, x: -999, y: -999 };
 
+  // ===== 下階の外周壁（一点鎖線） =====
+  // 2階以上の作図画面に、下の階の住宅ヴォリュームの外周を一点鎖線で重ねる。階ごとに色を変える（1階：橙、2階：水色）。
+  const WALL_LINE_COLORS = { 1: '#FFB020', 2: '#4FD8FF' };
+  const WALL_LINE_DASH = '14,4,3,4';
+  function wallSegments(grid) {
+    const segs = [];
+    if (!grid || !grid.length) return segs;
+    const R = grid.length, C = grid[0].length;
+    const v = (r, c) => r >= 0 && r < R && c >= 0 && c < C && isVol(grid[r][c]);
+    for (let fr = 0; fr <= R; fr++) {            // 横の壁（fr行の上端）
+      let start = -1;
+      for (let fc = 0; fc <= C; fc++) {
+        const edge = fc < C && v(fr - 1, fc) !== v(fr, fc);
+        if (edge && start < 0) start = fc;
+        if (!edge && start >= 0) { segs.push([fr, start, fr, fc]); start = -1; }
+      }
+    }
+    for (let fc = 0; fc <= C; fc++) {            // 縦の壁（fc列の左端）
+      let start = -1;
+      for (let fr = 0; fr <= R; fr++) {
+        const edge = fr < R && v(fr, fc - 1) !== v(fr, fc);
+        if (edge && start < 0) start = fr;
+        if (!edge && start >= 0) { segs.push([start, fc, fr, fc]); start = -1; }
+      }
+    }
+    return segs;
+  }
+  // toXY(fr, fc) → {x, y}。下の階（1階〜現在の階の1つ下）の外周壁を描く
+  function appendLowerWalls(parent, toXY, ns) {
+    const g = document.createElementNS(ns, 'g');
+    g.style.pointerEvents = 'none';
+    for (let n = 1; n < currentFloor; n++) {
+      wallSegments(floorStateGrid(n)).forEach(([r1, c1, r2, c2]) => {
+        const a = toXY(r1, c1), b = toXY(r2, c2);
+        const ln = document.createElementNS(ns, 'line');
+        ln.setAttribute('x1', a.x); ln.setAttribute('y1', a.y); ln.setAttribute('x2', b.x); ln.setAttribute('y2', b.y);
+        ln.setAttribute('stroke', WALL_LINE_COLORS[n] || '#FFFFFF');
+        ln.setAttribute('stroke-width', n === 1 ? 3 : 2.4);
+        ln.setAttribute('stroke-dasharray', WALL_LINE_DASH);
+        ln.setAttribute('stroke-linecap', 'butt');
+        g.appendChild(ln);
+      });
+    }
+    parent.appendChild(g);
+  }
+  function appendWallLegend(parent, ns, x, y) {
+    if (currentFloor < 2) return;
+    const t = document.createElementNS(ns, 'text');
+    t.setAttribute('x', x); t.setAttribute('y', y); t.setAttribute('font-size', '10'); t.setAttribute('font-weight', 'bold');
+    t.style.pointerEvents = 'none';
+    let html = '<tspan fill="#C9D3E0">一点鎖線＝下階の外周壁：</tspan>';
+    for (let n = 1; n < currentFloor; n++) html += `<tspan fill="${WALL_LINE_COLORS[n]}" dx="6">━ ･ ━ ${n}階</tspan>`;
+    t.innerHTML = html;
+    parent.appendChild(t);
+  }
+
+  // ===== バルコニー・屋根の面積算入 =====
+  // 床面積：2階以上の住宅ヴォリュームの外壁から2mを超えた部分は、その階の床面積に算入する。
+  // 建築面積：奥行きが1mを超える場合、先端から1m後退したラインまでを建築面積に算入する。
+  // 奥行きは外壁からの0.5マス（0.455m）単位のマス数で測る（外側の縁までの距離）。
+  const FINE_M = 0.455;
+  const FLOOR_AREA_LIMIT_M = 2.0;
+  const COVERAGE_SETBACK_M = 1.0;
+  function projectionMetrics(n, type) {
+    const g = floorStateGrid(n), g1 = floorStateGrid(1);
+    const out = { total: 0, floorCells: [], coverCells: [], maxDepthM: 0, unattached: 0 };
+    if (!g || !g.length) return out;
+    const R = g.length, C = g[0].length;
+    const dist = Array.from({ length: R }, () => Array(C).fill(-1));
+    const q = [];
+    for (let fr = 0; fr < R; fr++) for (let fc = 0; fc < C; fc++) if (isVol(g[fr][fc])) { dist[fr][fc] = 0; q.push([fr, fc]); }
+    const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (let i = 0; i < q.length; i++) {
+      const [fr, fc] = q[i];
+      for (const [dr, dc] of N4) {
+        const nr = fr + dr, nc = fc + dc;
+        if (nr < 0 || nr >= R || nc < 0 || nc >= C || g[nr][nc] !== type || dist[nr][nc] >= 0) continue;
+        dist[nr][nc] = dist[fr][fc] + 1; q.push([nr, nc]);
+      }
+    }
+    const seen = Array.from({ length: R }, () => Array(C).fill(false));
+    for (let fr = 0; fr < R; fr++) for (let fc = 0; fc < C; fc++) {
+      if (g[fr][fc] !== type || seen[fr][fc]) continue;
+      const comp = [], st = [[fr, fc]]; seen[fr][fc] = true;
+      while (st.length) {
+        const [r, c] = st.pop(); comp.push([r, c]);
+        for (const [dr, dc] of N4) {
+          const nr = r + dr, nc = c + dc;
+          if (nr < 0 || nr >= R || nc < 0 || nc >= C || g[nr][nc] !== type || seen[nr][nc]) continue;
+          seen[nr][nc] = true; st.push([nr, nc]);
+        }
+      }
+      out.total += comp.length;
+      const attached = comp.every(([r, c]) => dist[r][c] > 0);
+      const depthM = attached ? Math.max(...comp.map(([r, c]) => dist[r][c])) * FINE_M : Infinity;
+      if (attached) out.maxDepthM = Math.max(out.maxDepthM, depthM); else out.unattached += comp.length;
+      comp.forEach(([r, c]) => {
+        const k = attached ? dist[r][c] * FINE_M : Infinity;
+        if (type === 'balcony' && k > FLOOR_AREA_LIMIT_M + 1e-9) out.floorCells.push([r, c]);
+        const outside = !(g1 && g1[r] && isVol(g1[r][c]));
+        const counted = !attached || (depthM > COVERAGE_SETBACK_M + 1e-9 && k <= depthM - COVERAGE_SETBACK_M + 1e-9);
+        if (outside && counted) out.coverCells.push([r, c]);
+      });
+    }
+    return out;
+  }
+  // n階の床面積（0.5マスセル数）：住宅ヴォリューム（階段を含む）＋壁から2mを超えるバルコニー
+  function floorAreaCellsOf(n) {
+    return countHouseCells(floorStateGrid(n)) + (n > 1 ? projectionMetrics(n, 'balcony').floorCells.length : 0);
+  }
+  // 建築面積に加わる、1階の外形の外側にあるバルコニー・屋根の算入分（マス）
+  function extraCoverageMasu() {
+    const set = new Set();
+    for (let n = 2; n <= floorCount; n++) {
+      ['balcony', 'roof'].forEach(t => projectionMetrics(n, t).coverCells.forEach(([r, c]) => set.add(r + ',' + c)));
+    }
+    return set.size / MASU_TO_FINE;
+  }
+
+  // ===== バルコニー・屋根の診断（敷地境界線への接触・片持ちの限界） =====
+  const CANTILEVER_LIMIT_FINE = 3; // 下階の外壁面から1.5マス（0.5マスセル3個）まで
+  function isBoundaryMasu(r, c) {
+    if (r < 0 || r >= rows || c < 0 || c >= cols) return true;
+    return zoneGrid[r][c] !== 'site' || isSetbackCell(r, c) || isCornerCutCell(r, c);
+  }
+  function projectionTouchesBoundary(fr, fc) {
+    if (isBoundaryMasu(fr >> 1, fc >> 1)) return true;
+    return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dr, dc]) => {
+      const nr = fr + dr, nc = fc + dc;
+      return nr < 0 || nc < 0 || isBoundaryMasu(nr >> 1, nc >> 1);
+    });
+  }
+  // n階（2以上）のバルコニー・屋根について、診断項目と減点を返す
+  function projectionRuleItems(n) {
+    const g = floorStateGrid(n), low = floorStateGrid(n - 1);
+    const items = []; let pen = 0;
+    if (!g || !g.length) return { items, pen };
+    const R = g.length, C = g[0].length;
+    const m = c => (c / MASU_TO_FINE).toFixed(1);
+    const tag = n > 1 ? `${n}階` : '';
+    const names = { balcony: 'バルコニー', roof: `${n - 1}階屋根` };
+    ['balcony', 'roof'].forEach(type => {
+      let total = 0, touch = 0;
+      for (let fr = 0; fr < R; fr++) for (let fc = 0; fc < C; fc++) {
+        if (g[fr][fc] !== type) continue;
+        total++;
+        if (projectionTouchesBoundary(fr, fc)) touch++;
+      }
+      if (total === 0) return;
+      if (touch > 0) { items.push({ title: `${names[type]}と境界線`, status: 'bad', text: `不適合：${tag}${names[type]}のうち${m(touch)}マス分が敷地境界線（隣地・道路）に接しています。バルコニー・屋根は境界線に接しないように配置してください。` }); pen += 20; }
+      else items.push({ title: `${names[type]}と境界線`, status: 'good', text: `適合：${tag}${names[type]}は敷地境界線に接していません。` });
+    });
+    // 片持ち：バルコニーが下階の外壁面から1.5マスを超えて張り出していないか
+    let bal = 0, over = 0, maxD = 0;
+    if (low) {
+      const dist = Array.from({ length: R }, () => Array(C).fill(-1)); const q = [];
+      for (let fr = 0; fr < R; fr++) for (let fc = 0; fc < C; fc++) if (isVol(low[fr][fc])) { dist[fr][fc] = 0; q.push([fr, fc]); }
+      for (let i = 0; i < q.length; i++) {
+        const [fr, fc] = q[i];
+        [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dr, dc]) => {
+          const nr = fr + dr, nc = fc + dc;
+          if (nr < 0 || nr >= R || nc < 0 || nc >= C || dist[nr][nc] >= 0) return;
+          dist[nr][nc] = dist[fr][fc] + 1; q.push([nr, nc]);
+        });
+      }
+      for (let fr = 0; fr < R; fr++) for (let fc = 0; fc < C; fc++) {
+        if (g[fr][fc] !== 'balcony') continue;
+        bal++;
+        const d = dist[fr][fc] < 0 ? 99 : dist[fr][fc];
+        maxD = Math.max(maxD, d);
+        if (d > CANTILEVER_LIMIT_FINE) over++;
+      }
+    }
+    if (bal > 0) {
+      if (over > 0) { items.push({ title: 'バルコニーの張り出し（片持ち）', status: 'bad', text: `不適合：${tag}バルコニーが${n - 1}階の外壁面から1.5マスを超えて張り出している範囲が${m(over)}マスあります（最大約${(maxD >= 99 ? 0 : maxD / 2).toFixed(1)}マス）。片持ち梁の限界は1.5マスまでです。` }); pen += 20; }
+      else items.push({ title: 'バルコニーの張り出し（片持ち）', status: 'good', text: `適合：バルコニーの張り出しは${n - 1}階の外壁面から最大約${(maxD / 2).toFixed(1)}マスで、片持ちの限界1.5マス以内です。` });
+    }
+    return { items, pen };
+  }
+
   // ===== 指定容積率 =====
   // 前面道路の幅員による容積率制限：最も広い道路の幅員(m) × 0.4（40%）と指定容積率の小さいほうを適用する。
   const FAR_VALUES = [50, 60, 80, 100, 150, 200];
@@ -1607,7 +1787,7 @@
       if (zoneGrid[r][c] === 'site' && !isSetbackCell(r, c) && !isCornerCutCell(r, c)) siteCount++;
     }
     let cells = 0;
-    for (let n = 1; n <= floorCount; n++) cells += countHouseCells(floorStateGrid(n));
+    for (let n = 1; n <= floorCount; n++) cells += floorAreaCellsOf(n);
     const floorArea = cells / MASU_TO_FINE;
     return { siteCount, floorArea, far: siteCount > 0 ? floorArea / siteCount * 100 : 0 };
   }
@@ -1642,6 +1822,175 @@
     if (currentStep === 2) invalidateBlockDiagnosis();
   }
   window.setTargetFAR = setTargetFAR;
+
+  // ===== 階段エリア（ブロックプラン） =====
+  // 配置計画で置いた階段は、ブロックプランでは「階段エリア」として表示し、交通空間に含めて診断する。
+  // 階段エリアの一部（半分程度まで）は、階段下として収納空間・生理衛生空間に使ってよい。
+  const STAIR_USE_LIMIT = 0.5;
+  function syncStairsToBlock() {
+    if (!blockGrid || !footprintMask) return;
+    for (let fr = 0; fr < stateGrid.length; fr++) for (let fc = 0; fc < stateGrid[fr].length; fc++) {
+      if (stateGrid[fr][fc] === 'stairs' && footprintMask[fr] && footprintMask[fr][fc] && blockGrid[fr] && blockGrid[fr][fc] === null) blockGrid[fr][fc] = 'circulation';
+    }
+  }
+  function stairAreaStats() {
+    const st = { total: 0, circ: 0, storage: 0, wet: 0, other: 0, otherTypes: new Set() };
+    if (!blockGrid || !footprintMask) return st;
+    for (let fr = 0; fr < stateGrid.length; fr++) for (let fc = 0; fc < stateGrid[fr].length; fc++) {
+      if (stateGrid[fr][fc] !== 'stairs' || !(footprintMask[fr] && footprintMask[fr][fc])) continue;
+      st.total++;
+      const v = blockGrid[fr][fc];
+      if (v === 'storage') st.storage++;
+      else if (v === 'wet') st.wet++;
+      else if (v === null || v === 'circulation') st.circ++;
+      else { st.other++; st.otherTypes.add(v); }
+    }
+    return st;
+  }
+  function stairAreaItem() {
+    const st = stairAreaStats();
+    if (st.total === 0) return null;
+    const m = c => (c / MASU_TO_FINE).toFixed(1);
+    const names = { housework: '家事空間', common: '共同空間', private: '個人の空間' };
+    const used = st.storage + st.wet;
+    const allow = st.total * STAIR_USE_LIMIT;
+    if (currentFloor > 1) {
+      // 2階以上の階段エリアには、交通空間以外のブロックを配置できない
+      if (used + st.other > 0) {
+        const nm = { housework: '家事空間', common: '共同空間', private: '個人の空間' };
+        const kinds = [st.storage ? '収納空間' : '', st.wet ? '生理衛生空間' : '', ...[...st.otherTypes].map(t => nm[t] || t)].filter(Boolean).join('・');
+        return { pen: 15, item: { title: '階段エリア', status: 'bad', text: `不適合：${currentFloor}階の階段エリア（${m(st.total)}マス）に${kinds}が${m(used + st.other)}マス配置されています。2階以上の階段エリアには、交通空間以外のブロックを配置できません。` } };
+      }
+      return { pen: 0, item: { title: '階段エリア', status: 'good', text: `適合：階段エリア${m(st.total)}マスは交通空間として扱い、他のブロックは配置されていません。` } };
+    }
+    const usedTxt = [st.storage ? `収納空間${m(st.storage)}マス` : '', st.wet ? `生理衛生空間${m(st.wet)}マス` : ''].filter(Boolean).join('・');
+    if (st.other > 0) {
+      return { pen: 15, item: { title: '階段エリア', status: 'bad', text: `不適合：階段エリア（${m(st.total)}マス）に${[...st.otherTypes].map(t => names[t] || t).join('・')}が${m(st.other)}マス配置されています。階段エリアは交通空間として扱い、階段下として使えるのは収納空間・生理衛生空間だけです。` } };
+    }
+    if (used > allow + 1e-9) {
+      return { pen: 15, item: { title: '階段エリア', status: 'bad', text: `不適合：階段エリア（${m(st.total)}マス）のうち収納空間・生理衛生空間として使っている部分が${m(used)}マスで、半分（${m(allow)}マス）を超えています。階段として使える部分を残してください。` } };
+    }
+    return { pen: 0, item: { title: '階段エリア', status: 'good', text: `階段エリア${m(st.total)}マスを交通空間に含めて診断しています。${usedTxt ? `階段下の${usedTxt}は、階段エリアの半分（${m(allow)}マス）以内のため適合です。` : '階段下を収納空間・生理衛生空間に使う場合は、半分程度までなら適合です。'}` } };
+  }
+  // ブロックプラン図に、配置計画で置いたバルコニー・屋根を表示する
+  function drawProjectionAreas(g, minFR, minFC) {
+    const defs = { balcony: { fill: '#8FD3C1', stroke: '#2F8F7A', text: '#0B4A3C' }, roof: { fill: '#B07C6B', stroke: '#7A4A3B', text: '#4A2418' } };
+    for (let k = 2; k <= floorCount; k++) {
+      const grid = floorStateGrid(k);
+      if (!grid || !grid.length) continue;
+      const R = grid.length, C = grid[0].length;
+      ['roof', 'balcony'].forEach(type => {
+        const seen = Array.from({ length: R }, () => Array(C).fill(false));
+        const d = defs[type];
+        const solid = (k === currentFloor);
+        for (let fr = 0; fr < R; fr++) for (let fc = 0; fc < C; fc++) {
+          if (grid[fr][fc] !== type || seen[fr][fc]) continue;
+          const comp = [], stack = [[fr, fc]]; seen[fr][fc] = true;
+          while (stack.length) {
+            const [r, c] = stack.pop(); comp.push([r, c]);
+            [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dr, dc]) => {
+              const nr = r + dr, nc = c + dc;
+              if (nr < 0 || nr >= R || nc < 0 || nc >= C || seen[nr][nc] || grid[nr][nc] !== type) return;
+              seen[nr][nc] = true; stack.push([nr, nc]);
+            });
+          }
+          comp.forEach(([r, c]) => {
+            const x = BMARGIN + (c - minFC) * BFINE, y = BMARGIN + (r - minFR) * BFINE;
+            bsvg('rect', { x: x + 1, y: y + 1, width: BFINE - 2, height: BFINE - 2, fill: d.fill, 'fill-opacity': solid ? 0.8 : 0.16, stroke: d.stroke, 'stroke-width': 1.4, 'stroke-dasharray': solid ? '' : '4,3' }, g);
+          });
+          const top = comp.reduce((a, b) => (b[0] < a[0] || (b[0] === a[0] && b[1] < a[1])) ? b : a);
+          const label = type === 'roof' ? `${k - 1}階屋根` : (solid ? 'バルコニー' : `${k}階バルコニー`);
+          bsvg('text', { x: BMARGIN + (top[1] - minFC) * BFINE + 3, y: BMARGIN + (top[0] - minFR) * BFINE + 11, fill: solid ? d.text : '#E8F2F8', 'font-size': 10, 'font-weight': 'bold', stroke: solid ? 'rgba(255,255,255,0.8)' : 'rgba(10,30,50,0.8)', 'stroke-width': 2.5, 'paint-order': 'stroke' }, g, label);
+        }
+      });
+    }
+  }
+
+  function stairLabelsAndOutline(g, minFR, minFC) {
+    const R = stateGrid.length;
+    if (!R) return;
+    const C = stateGrid[0].length;
+    const seen = Array.from({ length: R }, () => Array(C).fill(false));
+    for (let fr = 0; fr < R; fr++) for (let fc = 0; fc < C; fc++) {
+      if (stateGrid[fr][fc] !== 'stairs' || seen[fr][fc]) continue;
+      const comp = [], stack = [[fr, fc]]; seen[fr][fc] = true;
+      while (stack.length) {
+        const [r, c] = stack.pop(); comp.push([r, c]);
+        [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dr, dc]) => {
+          const nr = r + dr, nc = c + dc;
+          if (nr < 0 || nr >= R || nc < 0 || nc >= C || seen[nr][nc] || stateGrid[nr][nc] !== 'stairs') return;
+          seen[nr][nc] = true; stack.push([nr, nc]);
+        });
+      }
+      comp.forEach(([r, c]) => {
+        const x = BMARGIN + (c - minFC) * BFINE, y = BMARGIN + (r - minFR) * BFINE;
+        bsvg('rect', { x: x + 1.5, y: y + 1.5, width: BFINE - 3, height: BFINE - 3, fill: 'rgba(127,209,255,0.12)', stroke: '#7FD1FF', 'stroke-width': 1.6, 'stroke-dasharray': '2,2' }, g);
+      });
+      // 階段エリアの左上のセルにラベルを付ける
+      const top = comp.reduce((a, b) => (b[0] < a[0] || (b[0] === a[0] && b[1] < a[1])) ? b : a);
+      const lx = BMARGIN + (top[1] - minFC) * BFINE + 3, ly = BMARGIN + (top[0] - minFR) * BFINE + 11;
+      const t = bsvg('text', { x: lx, y: ly, fill: '#0B3A55', 'font-size': 10, 'font-weight': 'bold', stroke: 'rgba(255,255,255,0.85)', 'stroke-width': 2.5, 'paint-order': 'stroke' }, g, '階段エリア');
+    }
+  }
+
+  // 各階のブロック数（階段エリアは交通空間に含める）。構成比は全階の合計で評価する。
+  function blockCountsOfFloor(n) {
+    const sg = floorStateGrid(n), bg = floorBlockGridOf(n);
+    const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0 };
+    let total = 0;
+    if (!sg) return { counts, total };
+    for (let fr = 0; fr < sg.length; fr++) for (let fc = 0; fc < sg[fr].length; fc++) {
+      if (!isVol(sg[fr][fc])) continue;
+      total++;
+      if (!bg || !bg[fr]) continue;
+      let v = bg[fr][fc];
+      if (sg[fr][fc] === 'stairs') v = 'circulation';
+      if (v) counts[v]++;
+    }
+    return { counts, total };
+  }
+  function computeAllFloorCounts() {
+    const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0 };
+    let totalFootprint = 0;
+    for (let n = 1; n <= floorCount; n++) {
+      const f = blockCountsOfFloor(n);
+      totalFootprint += f.total;
+      Object.keys(counts).forEach(k => { counts[k] += f.counts[k]; });
+    }
+    const filled = Object.keys(counts).reduce((t, k) => t + counts[k], 0);
+    return { counts, totalFootprint, filled };
+  }
+  // 構成比のバランス（共同・個人・収納・家事）。階数が2以上のときは全階の合計で評価する。
+  function compositionDiagnosis(rc, rf, withCirc) {
+    const items = []; let penalty = 0;
+    if (!(rf > 0)) return { items, penalty };
+    const suffix = floorCount > 1 ? `（1〜${floorCount}階の合計）` : '';
+    ['common', 'private', 'storage'].forEach(type => {
+      const { min: lo, max: hi } = AREA_RATIO_GUIDE[type];
+      const val = rc[type] / rf;
+      const loPct = (lo * 100).toFixed(0), hiPct = (hi * 100).toFixed(0);
+      const lowerGap = Math.max(0, lo - val), upperGap = Math.max(0, val - hi);
+      if (val >= lo - AREA_RATIO_TOLERANCE && val <= hi + AREA_RATIO_TOLERANCE) {
+        items.push({ title: `${ZONE_LABELS[type]}の面積比${suffix}`, status: 'good', text: `適合：実測比は約${(val * 100).toFixed(1)}%です。目安(${loPct}〜${hiPct}%)に対し、許容誤差±2.0ポイントの範囲内です。` });
+      } else {
+        const reason = lowerGap > 0 ? `下限を${(lowerGap * 100).toFixed(1)}ポイント下回っています` : `上限を${(upperGap * 100).toFixed(1)}ポイント上回っています`;
+        items.push({ title: `${ZONE_LABELS[type]}の面積比${suffix}`, status: 'bad', text: `不適合：実測比は約${(val * 100).toFixed(1)}%で、目安(${loPct}〜${hiPct}%)に対し${reason}（許容誤差±2.0ポイントを超えています）。` });
+        penalty += 8;
+      }
+    });
+    const hwMasu = rc.housework / MASU_TO_FINE, hwRatio = rc.housework / rf;
+    const hwText = `家事空間は${hwMasu.toFixed(1)}マス（約${(hwMasu / 2).toFixed(1)}畳）、実測比${(hwRatio * 100).toFixed(1)}%です。`;
+    if (hwMasu < 9) { items.push({ title: `家事空間の面積比・最低基準未達${suffix}`, status: 'bad', text: `${hwText}最低基準の9マス未満のため不適合です。` }); penalty += 8; }
+    else if (hwRatio > 0.17 + AREA_RATIO_TOLERANCE) { items.push({ title: `家事空間の面積比・上限超過${suffix}`, status: 'bad', text: `${hwText}上限17%を許容誤差±2.0ポイント超過しているため不適合です。` }); penalty += 8; }
+    else items.push({ title: `家事空間の面積比${suffix}`, status: 'good', text: `${hwText}最低基準9マス以上かつ上限17%以内で、基準内です。` });
+    if (withCirc && rc.circulation > 0) {
+      const cr = rc.circulation / rf;
+      if (cr <= 0.15 + AREA_RATIO_TOLERANCE) items.push({ title: `交通空間の面積比${suffix}`, status: 'good', text: `交通空間の実測比は約${(cr * 100).toFixed(1)}%で、上限15%以内です。` });
+      else if (cr <= 0.20) { items.push({ title: `交通空間の面積比${suffix}`, status: 'warn', text: `交通空間の実測比は約${(cr * 100).toFixed(1)}%で、上限15%をやや超えています。` }); penalty += 6; }
+      else { items.push({ title: `交通空間の面積比${suffix}`, status: 'bad', text: `交通空間の実測比は約${(cr * 100).toFixed(1)}%で、上限15%を大きく超えています。` }); penalty += 10; }
+    }
+    return { items, penalty };
+  }
 
   // ===== 階数（2階以上の配置計画・ブロックプラン） =====
   // 1階のデータは従来の変数（stateGrid / blockGrid / routes / entrance / entranceArea / cars）をそのまま使う。
@@ -1754,7 +2103,7 @@
   function switchFloor(n) {
     n = Math.max(1, Math.min(floorCount, Number(n) | 0));
     if (n === currentFloor) { renderFloorUi(); return; }
-    routeDraft = null; routeGesture = null; isPointerDown = false; carDrag = null; isBlockPointerDown = false;
+    routeDraft = null; routeGesture = null; isPointerDown = false; carDrag = null; isBlockPointerDown = false; blockPaintLastCell = null; blockEntranceDrag = null;
     stashCurrentFloor();
     loadFloorToGlobals(n);
     historyStack = []; blockHistoryStack = []; blockResetSnapshot = null; resetSnapshot = null;
@@ -1797,18 +2146,18 @@
     document.querySelectorAll('.tool-btn.multi-only').forEach(b => { b.style.display = floorCount > 1 ? '' : 'none'; });
     if (floorCount === 1 && currentTool === 'stairs') {
       currentTool = 'house';
-      document.querySelectorAll('.tool-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tool') === 'house'));
+      document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.toggle('active', b.getAttribute('data-tool') === 'house'));
     }
     const roofLabel = document.getElementById('roofLabel');
     if (roofLabel) roofLabel.textContent = `${Math.max(1, currentFloor - 1)}階屋根`;
-    document.querySelectorAll('.tool-btn').forEach(b => {
+    document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
       const lock = upper && !allowed.includes(b.getAttribute('data-tool'));
       b.classList.toggle('floor-locked', lock);
       b.disabled = lock;
     });
-    if (upper && currentTool !== 'block' && currentTool !== 'route' && !allowed.includes(currentTool)) {
+    if (upper && currentStep === 1 && currentTool !== 'block' && currentTool !== 'route' && !allowed.includes(currentTool)) {
       currentTool = 'house';
-      document.querySelectorAll('.tool-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tool') === 'house'));
+      document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.toggle('active', b.getAttribute('data-tool') === 'house'));
       const rotateBtn = document.getElementById('rotateEntranceBtn');
       if (rotateBtn) rotateBtn.style.display = 'none';
     }
@@ -1820,9 +2169,8 @@
       currentBlockTool = 'circulation';
       document.querySelectorAll('[data-block-tool]').forEach(b => b.classList.toggle('active', b.getAttribute('data-block-tool') === 'circulation'));
     }
-    if (upper && currentTool === 'route') { currentTool = 'block'; try { refreshRouteUi(); } catch (e) {} }
     const rc = document.getElementById('routeControls');
-    if (rc) rc.hidden = !(currentStep === 2 && !upper);
+    if (rc) rc.hidden = currentStep !== 2;
     const fg = document.getElementById('fillGardenBtn');
     if (fg) { fg.disabled = upper; fg.classList.toggle('floor-locked', upper); }
   }
@@ -1839,7 +2187,7 @@
         <div class="floor-panel-title">🏠 階数の設定</div>
         <div class="floor-row"><span class="floor-row-label">建物の階数</span><span class="floor-btns">${countBtns}</span></div>
         <div class="floor-row"><span class="floor-row-label">作図する階</span><span class="floor-btns">${floorBtns}</span></div>
-        <p class="floor-hint">2階以上は、下の階の住宅ヴォリュームの範囲内に「住宅」を配置します（玄関・駐車・アプローチ・庭は1階で計画します）。ブロックプランも階ごとに作図し、階段を含む交通空間は上下階で重なる位置に配置してください。図は「① 配置計画」「② ブロックプラン」のどちらでも、図の上の階ボタンで切り替えられます。</p>
+        <p class="floor-hint">2階以上は、下の階の住宅ヴォリュームの範囲内に「住宅」を配置します（玄関・駐車・アプローチ・庭は1階で計画します）。バルコニー・屋根は、外壁から2mを超える部分が床面積に、奥行き1m超の場合は先端から1m後退したラインまでが建築面積に算入されます（0.5マス＝0.455m単位で判定）。ブロックプランも階ごとに作図し、階段を含む交通空間は上下階で重なる位置に配置してください。図は「① 配置計画」「② ブロックプラン」のどちらでも、図の上の階ボタンで切り替えられます。</p>
         <div class="floor-notice" role="status"></div>`;
     }
     ['floorTabsStep1', 'floorTabsStep2'].forEach(id => {
@@ -1890,7 +2238,7 @@
     const parts = [];
     let total = 0;
     for (let n = 1; n <= floorCount; n++) {
-      const c = countHouseCells(floorStateGrid(n));
+      const c = floorAreaCellsOf(n);
       total += c; parts.push(`${n}階 ${a(c)}㎡`);
     }
     // 階段・バルコニー・屋根
@@ -1920,9 +2268,16 @@
         else items.push({ title: '階段位置', status: 'good', text: `適合：階段が${currentFloor - 1}階と同じ位置に${m(stairs)}マス配置されています。` });
       }
       if (balcony > 0) {
-        if (balconyAttached === 0) { items.push({ title: 'バルコニー', status: 'warn', text: `バルコニー（${m(balcony)}マス）が住宅ヴォリュームに接していません。居室などから出入りできる位置に配置しましょう。` }); score -= 5; }
-        else items.push({ title: 'バルコニー', status: 'good', text: `バルコニー${m(balcony)}マス（${a(balcony)}㎡）が住宅に接して配置されています。床面積には含めていません。` });
+        const bm = projectionMetrics(currentFloor, 'balcony');
+        const depthTxt = bm.maxDepthM > 0 ? `奥行きは最大約${bm.maxDepthM.toFixed(2)}m` : '';
+        if (balconyAttached === 0) { items.push({ title: 'バルコニー', status: 'warn', text: `バルコニー（${m(balcony)}マス）が住宅ヴォリュームに接していません。居室などから出入りできる位置に配置しましょう。接していない部分は、床面積・建築面積とも全体を算入して計算します。` }); score -= 5; }
+        const fa = bm.floorCells.length, cv = bm.coverCells.length;
+        const notes = [];
+        notes.push(fa > 0 ? `外壁から2mを超える${m(fa)}マス（${a(fa)}㎡）は${currentFloor}階の床面積に算入します（延べ床面積・容積率に加算）` : '外壁から2m以内に収まっているため、床面積には算入しません');
+        notes.push(cv > 0 ? `奥行きが1mを超えるため、先端から1m後退したラインまでの${m(cv)}マス（${a(cv)}㎡）を建築面積に算入します（建蔽率に加算）` : '建築面積への算入はありません（奥行き1m以下、または1階の外形の内側です）');
+        items.push({ title: 'バルコニーの面積算入', status: (fa > 0 || cv > 0) ? 'warn' : 'good', text: `バルコニー${m(balcony)}マス（${a(balcony)}㎡）${depthTxt ? '、' + depthTxt : ''}。${notes.join('。')}。` });
       }
+      { const pr = projectionRuleItems(currentFloor); pr.items.forEach(it => items.push(it)); score -= pr.pen; }
       if (lowerG && countHouseCells(lowerG) > 0 && upCells > 0) {
         if (uncovered > 0) { items.push({ title: `${currentFloor - 1}階の上部`, status: 'warn', text: `${currentFloor - 1}階の上に、${currentFloor}階の住宅・バルコニー・${currentFloor - 1}階屋根のいずれも指定されていない範囲が${m(uncovered)}マスあります。屋根またはバルコニーを配置しましょう。` }); score -= 5; }
         else items.push({ title: `${currentFloor - 1}階の上部`, status: 'good', text: `${currentFloor - 1}階の上部はすべて${currentFloor}階・バルコニー・屋根のいずれかで計画されています（${currentFloor - 1}階屋根${m(roof)}マス）。` });
@@ -1989,6 +2344,9 @@
     } else {
       items.push({ title: '階段（上下階の交通空間）', status: 'good', text: `適合：${currentFloor - 1}階の交通空間と${(overlap / MASU_TO_FINE).toFixed(1)}マス重なっており、階段を通せます。` });
     }
+    { const sa = stairAreaItem(); if (sa) { items.push(sa.item); score -= sa.pen; } }
+    { const rt = computeAllFloorCounts(); const cd = compositionDiagnosis(rt.counts, rt.filled, true); cd.items.forEach(it => items.push(it)); score -= cd.penalty; }
+    { const rc = Object.assign({}, counts, { stairs: stairAreaStats().total }); score += evaluateRouteDiagnosis(items, rc, routeCfgsUpper()); }
     // 全階を通した6ブロックの使用
     const total6 = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0 };
     for (let n = 1; n <= floorCount; n++) {
@@ -2044,14 +2402,12 @@
           }
         }
       }
+      appendLowerWalls(g, (fr, fc) => ({ x: BMARGIN + (fc - minFC) * BFINE, y: BMARGIN + (fr - minFR) * BFINE }), SVG_NS);
       bsvg('text', { x: 8, y: height - 8, fill: '#FFD27A', 'font-size': 10 }, g, `淡色＝${currentFloor - 1}階の外形　黄色の点線＝${currentFloor - 1}階の交通空間（階段位置の目安）`);
+      appendWallLegend(g, SVG_NS, 8, height - 22);
     }
-    if (floorCount > 1) {
-      for (let fr = 0; fr < stateGrid.length; fr++) for (let fc = 0; fc < stateGrid[fr].length; fc++) {
-        if (stateGrid[fr][fc] !== 'stairs') continue;
-        bsvg('rect', { x: BMARGIN + (fc - minFC) * BFINE + 1.5, y: BMARGIN + (fr - minFR) * BFINE + 1.5, width: BFINE - 3, height: BFINE - 3, fill: 'none', stroke: '#7FD1FF', 'stroke-width': 1.6, 'stroke-dasharray': '2,2' }, g);
-      }
-    }
+    drawProjectionAreas(g, minFR, minFC);
+    stairLabelsAndOutline(g, minFR, minFC);
     if (floorCount > 1) bsvg('text', { x: 10, y: 34, fill: '#FFD37A', 'font-size': 13, 'font-weight': 'bold' }, g, `${currentFloor}階 ブロックプラン`);
     svg.appendChild(g);
   }
@@ -2149,7 +2505,7 @@
       }
       const fallback = document.getElementById('drawingDownloadFallback');
       if (fallback) { fallback.value = json; fallback.classList.add('hidden'); }
-      setDrawingStatus('図面をダウンロードしました', 'success');
+      setDrawingStatus('保存しました', 'success');
     } catch (error) {
       const fallback = document.getElementById('drawingDownloadFallback');
       if (fallback && typeof json === 'string') { fallback.value = json; fallback.classList.remove('hidden'); }
@@ -2200,7 +2556,7 @@
         targetParkingPerpendicular=next.targetParkingPerpendicular; targetParkingParallel=next.targetParkingParallel; targetParkingTandem=next.targetParkingTandem;
         cols=next.cols; rows=next.rows; flagW=next.flagW; flagH=next.flagH; poleW=next.poleW; poleX=next.poleX; poleH=next.poleH; paintGranularity=next.paintGranularity; paintMode=next.paintMode;
         zoneGrid=next.zoneGrid; stateGrid=next.stateGrid; entrance=next.entrance; entranceDir=next.entranceDir; entranceArea=Array.isArray(next.entranceArea) ? next.entranceArea : []; cars=next.cars || []; routes=next.routes; routeDraft=null; routeGesture=null;
-        blockGrid=next.blockGrid || null; blockGridDims=next.blockGridDims || {rows:0,cols:0}; blockPaintMode=next.blockPaintMode || 'cell'; blockPaintGranularity=next.blockPaintGranularity || 'full';
+        blockGrid=next.blockGrid || null; blockGridDims=next.blockGridDims || {rows:0,cols:0}; blockPaintMode=next.blockPaintMode || 'cell'; blockPaintGranularity=next.blockPaintGranularity || 'full'; try { setBlockPaintGranularity(blockPaintGranularity); } catch (e) {}
         entranceArea = Array.isArray(next.entranceArea) ? next.entranceArea.map(p => Number.isInteger(p?.r) && Number.isInteger(p?.c) ? (p.f ? { r: p.r, c: p.c, f: 1 } : { r: p.r, c: p.c }) : { r: Math.floor((p?.fr || 0) / 2), c: Math.floor((p?.fc || 0) / 2) }) : [];
         resetSnapshot=null; historyStack=[]; pushHistory(); updateBrief(); renderAll(); invalidateDiagnosis();
 if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
@@ -2469,7 +2825,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
       // ブロックプランにも図面の保存データ読み込み・ダウンロードを置く（内容は配置計画とブロックプランの両方を含む）
       const savePanel = document.createElement('div');
       savePanel.className = 'drawing-save-panel';
-      savePanel.innerHTML = '<div class="drawing-save-actions"><button type="button" onclick="loadDrawing()" class="drawing-load-btn" style="background:#fff;color:#132A45;font-weight:700;font-size:11px;">保存データを読み込む</button> <button type="button" onclick="downloadDrawingJson(event)" class="drawing-load-btn" style="background:#fff;color:#132A45;font-weight:700;font-size:11px;">図面をダウンロード</button></div><div id="blockDrawingSaveStatus" class="drawing-save-status" role="status" aria-live="polite" style="color:#526375;font-size:10px;">配置計画とブロックプランの内容をまとめて保存します</div>';
+      savePanel.innerHTML = '<div class="drawing-save-actions"><button type="button" onclick="loadDrawing()" class="drawing-load-btn" style="background:#fff;color:#132A45;font-weight:700;font-size:11px;">開く</button> <button type="button" onclick="downloadDrawingJson(event)" class="drawing-load-btn" style="background:#fff;color:#132A45;font-weight:700;font-size:11px;">保存</button></div><div id="blockDrawingSaveStatus" class="drawing-save-status" role="status" aria-live="polite" style="color:#526375;font-size:10px;">配置計画とブロックプランの内容をまとめて保存します</div>';
       blockTools.insertBefore(savePanel, blockTools.firstChild);
     }
     if (routeControls && blockTools) {
@@ -2555,9 +2911,9 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
   }
 
   function setupEventListeners() {
-    document.querySelectorAll('.tool-btn').forEach(btn => {
+    document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentTool = btn.getAttribute('data-tool');
         if (currentTool !== 'route') { routeDraft = null; routeGesture = null; }
@@ -2899,7 +3255,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
       }
     }
 
-    const bcr = siteCount > 0 ? (houseCount / siteCount) * 100 : 0;
+    const bcr = siteCount > 0 ? ((houseCount + extraCoverageMasu()) / siteCount) * 100 : 0;
     document.getElementById('bcrValue').innerText = `${bcr.toFixed(1)}%`;
     updateFARMeter();
     const bcrMeter = document.getElementById('bcrMeter');
@@ -2997,7 +3353,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
     zoneGrid = JSON.parse(JSON.stringify(s.zoneGrid)); stateGrid = JSON.parse(JSON.stringify(s.stateGrid));
     entrance = s.entrance ? { ...s.entrance } : null; entranceDir = s.entranceDir;
     entranceArea = Array.isArray(s.entranceArea) ? JSON.parse(JSON.stringify(s.entranceArea)) : []; cars = JSON.parse(JSON.stringify(s.cars)); resetSnapshot = null;
-    document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-tool') === currentTool));
+    document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-tool') === currentTool));
     updateChoiceButtons('#paintGranularityBtns', paintGranularity === 'half' ? 1 : 0);
     updateChoiceButtons('#paintModeBtns', paintMode === 'bucket' ? 1 : 0);
     updateChoiceButtons('#bcrSelector', [40, 50, 60, 70, 80].indexOf(targetBCR));
@@ -3333,6 +3689,11 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
     }
 
     svg.appendChild(gLines);
+
+    if (currentFloor > 1) {
+      appendLowerWalls(svg, (fr, fc) => ({ x: MARGIN + fc * HALF, y: MARGIN + fr * HALF }), 'http://www.w3.org/2000/svg');
+      appendWallLegend(svg, 'http://www.w3.org/2000/svg', 8, height - 6);
+    }
 
     renderRoads(svg);
 
@@ -3790,7 +4151,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
       }
     }
 
-    const bcr = siteCount > 0 ? (houseCount / siteCount) * 100 : 0;
+    const bcr = siteCount > 0 ? ((houseCount + extraCoverageMasu()) / siteCount) * 100 : 0;
     document.getElementById('bcrValue').innerText = `${bcr.toFixed(1)}%`;
     updateFARMeter();
     const bcrMeter = document.getElementById('bcrMeter');
@@ -3847,6 +4208,9 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
         else if (upN > 0) items.push({ title: '階段位置', status: 'good', text: '適合：1階と2階の階段が同じ位置に配置されています。' });
       }
     }
+
+    for (let n = 2; n <= floorCount; n++) { const pr = projectionRuleItems(n); pr.items.forEach(it => items.push(it)); score -= pr.pen; }
+    { const ex = extraCoverageMasu(); if (ex > 0) items.push({ title: '建築面積への算入', status: 'good', text: `2階以上のバルコニー・屋根のうち、1階の外形からはみ出して奥行き1mを超える部分（先端から1m後退したラインまで）${ex.toFixed(1)}マスを建築面積に算入し、建蔽率に加えています。` }); }
 
     // 2. 住宅ヴォリュームの配置（各直交方向で境界線から1マス以上離隔）
     // 住宅の各外周セルから、同じ行・列上の最寄りの隣地境界線または道路境界線までを
@@ -4739,6 +5103,13 @@ ${currentReport}
     return [[fr, fc], [fr, fc + 1], [fr + 1, fc], [fr + 1, fc + 1]];
   }
 
+  // 表示中のボタン（押されている方）を正として塗りつぶし単位を決める
+  function syncBlockGranularityFromButtons() {
+    const btns = Array.from(document.querySelectorAll('#blockPaintGranularityBtns button'));
+    const i = btns.findIndex(b => b.classList.contains('active'));
+    if (i >= 0) blockPaintGranularity = i === 1 ? 'half' : 'full';
+    return blockPaintGranularity;
+  }
   function setBlockPaintGranularity(mode) {
     blockPaintGranularity = mode;
     const idx = mode === 'half' ? 1 : 0;
@@ -4840,7 +5211,14 @@ ${currentReport}
   window.goToStep = goToStep;
   (function () {
     const base = goToStep;
-    goToStep = function (n) { const r = base(n); applyFloorUiState(); renderFloorUi(); return r; };
+    goToStep = function (n) {
+      // 配置計画からブロックプランへ移るときは、必ず1階から作図を始める
+      if (n === 2 && currentStep === 1 && currentFloor !== 1) { switchFloor(1); }
+      const r = base(n);
+      applyFloorUiState(); renderFloorUi();
+      if (n === 2 && floorCount > 1 && currentStep === 2 && currentFloor === 1) setFloorNotice('ブロックプランは1階から作図します。階ボタンで上の階に切り替えられます。');
+      return r;
+    };
     window.goToStep = goToStep;
   })();
 
@@ -4868,9 +5246,24 @@ ${currentReport}
   function entranceAreaCellFromEvent(e) {
     const cell = getBlockCellFromEvent(e);
     if (!cell) return null;
-    return blockPaintGranularity === 'half' ? { r: cell.fr, c: cell.fc, f: 1 } : { r: Math.floor(cell.fr / 2), c: Math.floor(cell.fc / 2) };
+    return syncBlockGranularityFromButtons() === 'half' ? { r: cell.fr, c: cell.fc, f: 1 } : { r: Math.floor(cell.fr / 2), c: Math.floor(cell.fc / 2) };
   }
   const sameAreaCell = (a, b) => !!a && !!b && a.r === b.r && a.c === b.c && !!a.f === !!b.f;
+  // 消しゴム用：指定した0.5マスセルにかかる玄関エリアを消す（1マス単位の玄関エリアは、残りの0.5マスセルに分けて残す）
+  function eraseEntranceAreaFine(cells) {
+    if (!Array.isArray(entranceArea) || !entranceArea.length) return false;
+    const kill = new Set(cells.map(([r, c]) => r + ',' + c));
+    let changed = false;
+    const next = [];
+    entranceArea.forEach(p => {
+      const fine = entranceAreaFineCells(p);
+      const keep = fine.filter(([r, c]) => !kill.has(r + ',' + c));
+      if (keep.length === fine.length) next.push(p);
+      else { changed = true; keep.forEach(([r, c]) => next.push({ r, c, f: 1 })); }
+    });
+    if (changed) entranceArea = next;
+    return changed;
+  }
   function toggleEntranceAreaCell(cell) {
     if (!cell || !entranceAreaFineCells(cell).every(([r, c]) => footprintMask?.[r]?.[c])) return;
     const index = entranceArea.findIndex(p => sameAreaCell(p, cell));
@@ -5086,16 +5479,22 @@ ${currentReport}
     blockPaintLastCell = cellKey;
     const val = currentBlockTool === 'eraser' ? null : currentBlockTool;
     const r = Math.floor(cell.fr / 2), c = Math.floor(cell.fc / 2);
-    const targetCells = (blockPaintGranularity === 'half') ? [[cell.fr, cell.fc]] : fineCellsOfBlock(r, c);
+    const targetCells = (syncBlockGranularityFromButtons() === 'half') ? [[cell.fr, cell.fc]] : fineCellsOfBlock(r, c);
 
     let changed = false;
     targetCells.forEach(([ffr, ffc]) => {
       if (!footprintMask[ffr] || !footprintMask[ffr][ffc]) return;
+      if (currentFloor > 1 && val && val !== 'circulation' && stateGrid[ffr][ffc] === 'stairs') { setFloorNotice('2階以上の階段エリアには、交通空間以外のブロックは配置できません。'); return; }
       if (blockGrid[ffr][ffc] !== val) {
         blockGrid[ffr][ffc] = val;
         changed = true;
       }
     });
+    // 消しゴムでは、他のブロックと同様に玄関エリアも消せる
+    if (currentBlockTool === 'eraser') {
+      const inside = targetCells.filter(([ffr, ffc]) => footprintMask[ffr] && footprintMask[ffr][ffc]);
+      if (eraseEntranceAreaFine(inside)) changed = true;
+    }
 
     if (changed) {
       renderBlockAll();
@@ -5121,8 +5520,12 @@ ${currentReport}
 
     const isEraser = currentBlockTool === 'eraser';
     const clickedValue = blockGrid[fr][fc];
+    const areaSet = new Set();
+    if (isEraser) entranceArea.forEach(p => entranceAreaFineCells(p).forEach(([r, c]) => areaSet.add(r + ',' + c)));
+    const inArea = (r, c) => areaSet.has(r + ',' + c);
+    const clickedArea = isEraser && inArea(fr, fc);
     if (isEraser) {
-      if (clickedValue === null) return; // 消す対象がない
+      if (clickedValue === null && !clickedArea) return; // 消す対象がない
     } else {
       if (clickedValue !== null) return; // 既に何か塗られているマスはバケツ塗りの対象外
     }
@@ -5142,7 +5545,9 @@ ${currentReport}
         if (nfr < 0 || nfr >= blockGridDims.rows || nfc < 0 || nfc >= blockGridDims.cols) return;
         if (!footprintMask[nfr][nfc]) return;
         if (visited[nfr][nfc]) return;
+        if (currentFloor > 1 && !isEraser && fillValue !== 'circulation' && stateGrid[nfr][nfc] === 'stairs') return;
         if (blockGrid[nfr][nfc] !== matchValue) return;
+        if (isEraser && inArea(nfr, nfc) !== clickedArea) return;
         visited[nfr][nfc] = true;
         stack.push([nfr, nfc]);
       });
@@ -5150,6 +5555,7 @@ ${currentReport}
 
     if (cellsToFill.length === 0) return;
     cellsToFill.forEach(([cfr, cfc]) => { blockGrid[cfr][cfc] = fillValue; });
+    if (isEraser) eraseEntranceAreaFine(cellsToFill);
     renderBlockAll();
     updateBlockStats();
     invalidateBlockDiagnosis();
@@ -5157,7 +5563,7 @@ ${currentReport}
 
   function pushBlockHistory() {
     if (!blockGrid) return;
-    blockHistoryStack.push(JSON.parse(JSON.stringify(blockGrid)));
+    blockHistoryStack.push({ g: JSON.parse(JSON.stringify(blockGrid)), ea: JSON.parse(JSON.stringify(entranceArea || [])) });
     if (blockHistoryStack.length > 20) blockHistoryStack.shift();
   }
 
@@ -5165,14 +5571,17 @@ ${currentReport}
     if (blockResetSnapshot) {
       const s = blockResetSnapshot;
       blockGrid = JSON.parse(JSON.stringify(s.blockGrid));
+      if (currentFloor === 1 && Array.isArray(s.entranceArea)) entranceArea = JSON.parse(JSON.stringify(s.entranceArea));
       currentBlockTool = s.currentBlockTool; blockPaintMode = s.blockPaintMode;
-      blockPaintGranularity = s.blockPaintGranularity; blockResetSnapshot = null;
+      setBlockPaintGranularity(s.blockPaintGranularity || 'full'); blockResetSnapshot = null;
       renderBlockAll(); updateBlockStats(); invalidateBlockDiagnosis();
       return;
     }
     if (blockHistoryStack.length > 1) {
       blockHistoryStack.pop();
-      blockGrid = JSON.parse(JSON.stringify(blockHistoryStack[blockHistoryStack.length - 1]));
+      const hs = blockHistoryStack[blockHistoryStack.length - 1];
+      blockGrid = JSON.parse(JSON.stringify(hs.g));
+      if (currentFloor === 1) entranceArea = JSON.parse(JSON.stringify(hs.ea || []));
       renderBlockAll();
       updateBlockStats();
       invalidateBlockDiagnosis();
@@ -5185,6 +5594,7 @@ ${currentReport}
     if (saveBefore) {
       blockResetSnapshot = {
         blockGrid: JSON.parse(JSON.stringify(blockGrid)),
+        entranceArea: JSON.parse(JSON.stringify(entranceArea || [])),
         currentBlockTool, blockPaintMode, blockPaintGranularity
       };
     }
@@ -5193,6 +5603,7 @@ ${currentReport}
         if (footprintMask[fr][fc]) blockGrid[fr][fc] = null;
       }
     }
+    entranceArea = [];
     pushBlockHistory();
     renderBlockAll();
     updateBlockStats();
@@ -5338,6 +5749,7 @@ ${currentReport}
   function renderBlockAll() {
     const svg = document.getElementById('blockSvg');
     if (!svg || !footprintBBox || !footprintMask) return;
+    syncStairsToBlock();
     svg.innerHTML = '';
 
     const { minFR, maxFR, minFC, maxFC } = footprintBBox;
@@ -5579,17 +5991,21 @@ ${currentReport}
 
   function computeBlockCounts() {
     const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0 };
+    const underStair = { wet: 0, storage: 0 };
     let totalFootprint = 0;
-    if (!blockGrid || !footprintMask) return { counts, totalFootprint };
+    if (!blockGrid || !footprintMask) return { counts, totalFootprint, underStair };
+    syncStairsToBlock();
     for (let fr = 0; fr < blockGridDims.rows; fr++) {
       for (let fc = 0; fc < blockGridDims.cols; fc++) {
         if (!footprintMask[fr][fc]) continue;
         totalFootprint++;
-        const v = blockGrid[fr][fc];
+        let v = blockGrid[fr][fc];
+        // 階段エリアは交通空間に含める（階段下の収納・生理衛生の利用分は underStair に記録する）
+        if (stateGrid[fr] && stateGrid[fr][fc] === 'stairs' && v) { if (v === 'wet' || v === 'storage') underStair[v]++; v = 'circulation'; }
         if (v) counts[v]++;
       }
     }
-    return { counts, totalFootprint };
+    return { counts, totalFootprint, underStair };
   }
 
   // 配置比率の目安(%)を、実際に設計された住宅ヴォリュームのマス数に換算した目安を返す
@@ -5620,7 +6036,10 @@ ${currentReport}
     const statsEl = document.getElementById('blockStats');
     const volumeEl = document.getElementById('blockVolumeTotal');
     if (!statsEl) return;
-    const { counts, totalFootprint } = computeBlockCounts();
+    const cur = computeBlockCounts();
+    const tot = floorCount > 1 ? computeAllFloorCounts() : null;
+    const counts = tot ? tot.counts : cur.counts;
+    const totalFootprint = tot ? tot.totalFootprint : cur.totalFootprint;
     const filled = counts.circulation + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
     const unassigned = totalFootprint - filled;
 
@@ -5635,7 +6054,7 @@ ${currentReport}
     if (volumeEl) volumeEl.innerHTML = `住宅ヴォリューム: ${totalMasu}マス (${totalArea}㎡)`;
     const totalHtml = `
       <div style="display:flex; justify-content:space-between; align-items:baseline; padding:2px 0 6px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.12); font-weight:bold;">
-        <span>${currentFloor > 1 ? currentFloor + '階 ' : ''}住宅ヴォリューム合計</span>
+        <span>${tot ? '1〜' + floorCount + '階の合計：' : ''}住宅ヴォリューム合計</span>
         <span style="font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;">${totalMasu}マス (${totalArea}㎡)</span>
       </div>`;
 
@@ -5668,7 +6087,7 @@ ${currentReport}
       const ratio = pctBase > 0 ? (cnt / pctBase) : 0; // 適正範囲判定・バー上の目安表示に用いる比率(filled基準)
       const area = (cnt * FINE_CELL_AREA).toFixed(2);
       const masu = (cnt / MASU_TO_FINE).toFixed(1);
-      const isUpperFloor = currentFloor > 1;
+      const isUpperFloor = false;
       const target = isUpperFloor ? '' : computeTargetMasuText(key, totalFootprint);
 
       const [lo, hi] = isUpperFloor ? [0, 0] : (RANGE_DEFS[key] || [0, 1]);
@@ -5698,7 +6117,9 @@ ${currentReport}
       ? `<div style="font-size:11px; color:var(--warn); margin-top:2px;">未配置: ${unassignedPct.toFixed(0)}% (${(unassigned * FINE_CELL_AREA).toFixed(2)}㎡)</div>`
       : `<div style="font-size:11px; color:var(--good); margin-top:2px;">✓ 住宅ヴォリューム全体に配置済み</div>`;
 
-    statsEl.innerHTML = totalHtml + rowsHtml + unassignedHtml;
+    const curFilled = cur.counts.circulation + cur.counts.housework + cur.counts.wet + cur.counts.common + cur.counts.private + cur.counts.storage;
+    const curHtml = tot ? `<div style="font-size:11px; color:#8a97a5; margin-top:4px; border-top:1px dashed rgba(255,255,255,0.15); padding-top:4px;">構成比は1〜${floorCount}階に配置したブロックの合計で評価します。この階（${currentFloor}階）：配置済み${(curFilled / MASU_TO_FINE).toFixed(1)}マス／${(cur.totalFootprint / MASU_TO_FINE).toFixed(1)}マス</div>` : '';
+    statsEl.innerHTML = totalHtml + rowsHtml + unassignedHtml + curHtml;
   }
 
   function invalidateBlockDiagnosis() {
@@ -5793,10 +6214,179 @@ ${currentReport}
     return null;
   }
 
+  // 生活動線・家事動線の診断（1階・2階以上で共通）。階段エリアは到達先の種別 'stairs' として扱う。
+  function evaluateRouteDiagnosis(items, counts, cfgList) {
+    let score = 0;
+    // 5b/5c. 生活動線・家事動線
+    // 生徒が「動線作図」で実際に描いた線を診断材料にする（作図中は診断しない）。
+    // 始点・終点のブロック種別と、描いた線の長さ(0.5マス単位)で評価する。
+    const routeLenFine = (route) => {
+      let len = 0;
+      for (let i = 1; i < route.length; i++) {
+        const dr = route[i].fr - route[i - 1].fr, dc = route[i].fc - route[i - 1].fc;
+        len += Math.sqrt(dr * dr + dc * dc);
+      }
+      return len;
+    };
+    // 動線の頂点は 455mm 格子の交点にある。交点を囲む4セル(住宅ヴォリューム内)のゾーン種別を、その点が接するゾーンとして扱う。
+    // 境界線上の点は両側のゾーンに接している扱いにするが、離れた線どうしの交差や近接では到達扱いにしない。
+    const touchingCells = (p) => [[p.fr - 1, p.fc - 1], [p.fr - 1, p.fc], [p.fr, p.fc - 1], [p.fr, p.fc]]
+      .filter(([r, c]) => footprintMask[r] && footprintMask[r][c]);
+    const typesAt = (p) => new Set(touchingCells(p).flatMap(([r, c]) => [blockGrid[r][c], (stateGrid[r] && stateGrid[r][c] === 'stairs') ? 'stairs' : null]).filter(Boolean));
+    const evalRoutes = (cfg) => {
+      if (counts[cfg.from] === 0) return;
+      if (cfg.to.every(k => counts[k] === 0)) {
+        items.push({ title: cfg.title, status: 'bad', text: `${cfg.toLabel}が配置されていないため、${cfg.title}を評価できません。` });
+        score -= 10;
+        return;
+      }
+      const drawn = cfg.list.filter(r => r && r.length >= 2);
+      if (drawn.length === 0) {
+        items.push({ title: cfg.title, status: 'bad', text: `${cfg.title}が描かれていません。「動線作図」で「${cfg.title}」を選び、${cfg.fromLabel}から${cfg.toLabel}までの動線を描いてください。` });
+        score -= 15;
+        return;
+      }
+      // 始点・終点の向きは問わない：一方の端点が「必要とするブロック(from)」、もう一方が「到達先ブロック(to)」に達していれば有効。
+      // さらに、別の部屋から引いた動線が、すでに到達先へ届いている動線の途中に合流している場合は、
+      // 合流した先までを含めて「その部屋からの動線」とみなす（合流後の部分は各部屋の動線の一部）。
+      const touchesFrom = (pt) => typesAt(pt).has(cfg.from);
+      const touchesTo = (pt) => cfg.to.some(t => typesAt(pt).has(t));
+      const resolved = new Map();   // 動線の番号 -> from側から到達先までの経路（頂点の並び）
+      const hosts = new Map();      // 動線の番号 -> 到達先(to)に端点が届いている経路（到達先側が末尾）。他の動線が合流できる幹線
+      const coverPoints = [];       // 「必要とするブロック」側の端点（どの部屋から出ているかの判定用）
+      drawn.forEach((r, i) => {
+        const a = r[0], b = r[r.length - 1];
+        // 到達先に端点が届いている動線は、他の部屋の動線が合流できる幹線になる（幹線自体の反対側の端点は問わない）
+        if (touchesTo(b)) hosts.set(i, r.slice());
+        else if (touchesTo(a)) hosts.set(i, r.slice().reverse());
+        const ab = touchesFrom(a) && touchesTo(b), ba = touchesFrom(b) && touchesTo(a);
+        if (!ab && !ba) return;
+        resolved.set(i, ab ? r.slice() : r.slice().reverse());
+        if (touchesFrom(a)) coverPoints.push(a);
+        if (touchesFrom(b)) coverPoints.push(b);
+      });
+      const cellsOnSegment = (p, q) => rasterSegment(p, q);
+      for (let pass = 0; pass < drawn.length; pass++) {
+        let progressed = false;
+        drawn.forEach((r, i) => {
+          if (resolved.has(i) || hosts.has(i)) return;
+          [[r[0], r[r.length - 1], false], [r[r.length - 1], r[0], true]].forEach(([fromPt, mergePt, rev]) => {
+            if (resolved.has(i) || !touchesFrom(fromPt)) return;
+            // mergePt が、到達先へ届いている動線H上（頂点または線の途中）にあれば合流とみなす
+            hosts.forEach((H, hi) => {
+              if (resolved.has(i) || hi === i) return;
+              for (let k = 0; k < H.length - 1; k++) {
+                if (cellsOnSegment(H[k], H[k + 1]).some(cell => cell.fr === mergePt.fr && cell.fc === mergePt.fc)) {
+                  const own = rev ? r.slice().reverse() : r.slice();   // fromPt → mergePt
+                  const tail = H.slice(k + 1);                          // 合流点から先（到達先まで）
+                  const merged = own.concat(samePoint(own[own.length - 1], H[k + 1]) ? tail.slice(1) : tail);
+                  resolved.set(i, merged);
+                  hosts.set(i, merged);
+                  coverPoints.push(fromPt);
+                  progressed = true;
+                  return;
+                }
+              }
+            });
+          });
+        });
+        if (!progressed) break;
+      }
+      const valid = [...resolved.values()];
+      if (valid.length === 0) {
+        items.push({ title: cfg.title, status: 'bad', text: `描かれた${cfg.title}の端点が、${cfg.fromLabel}と${cfg.toLabel}に達していません。動線の一方の端を${cfg.fromLabel}、もう一方の端を${cfg.toLabel}に届かせてください（描く向きは問いません。別の動線の途中に合流してもかまいません）。` });
+        score -= 15;
+        return;
+      }
+      const comps = floodFillGroups((r, c) => footprintMask[r][c] && blockGrid[r][c] === cfg.from);
+      const uncovered = comps.filter(comp => !coverPoints.some(pt => touchingCells(pt).some(([tr, tc]) => comp.some(([fr, fc]) => fr === tr && fc === tc))));
+      if (uncovered.length > 0) {
+        items.push({ title: cfg.title, status: 'warn', text: `${cfg.fromLabel}の一部（${uncovered.length}か所）から、${cfg.toLabel}への${cfg.title}が描かれていません。すべての${cfg.fromLabel}から動線を描きましょう。` });
+        score -= 8;
+        return;
+      }
+      // 目的エリア間の距離で評価する：from側の1まとまりの空間（個室①など）ごとに、
+      // 目的の各空間（階段・共同空間・生理衛生空間）まで、描いた動線に沿って10マス（9,100mm）以下かを見る。
+      const LIMIT_MASU = 10;
+      const key = (pt) => `${pt.fr},${pt.fc}`;
+      const allPts = new Map();
+      const adj = new Map();
+      const addEdge = (p, q) => {
+        const d = Math.hypot(p.fr - q.fr, p.fc - q.fc);
+        const kp = key(p), kq = key(q);
+        if (kp === kq) return;
+        if (!adj.has(kp)) adj.set(kp, []); if (!adj.has(kq)) adj.set(kq, []);
+        adj.get(kp).push([kq, d]); adj.get(kq).push([kp, d]);
+      };
+      // 描いた線を格子点ごとに分割して経路グラフにする（線の途中で通過する空間・合流点も到達点として扱う）
+      drawn.forEach(r => {
+        for (let i = 0; i < r.length - 1; i++) {
+          const cells = rasterSegment(r[i], r[i + 1]);
+          cells.forEach(c => allPts.set(key(c), { fr: c.fr, fc: c.fc }));
+          for (let k = 0; k < cells.length - 1; k++) addEdge(cells[k], cells[k + 1]);
+        }
+      });
+      const dijkstra = (srcKeys) => {
+        const dist = new Map(); srcKeys.forEach(k => dist.set(k, 0));
+        const done = new Set();
+        while (true) {
+          let cur = null, cd = Infinity;
+          dist.forEach((d, k) => { if (!done.has(k) && d < cd) { cd = d; cur = k; } });
+          if (cur === null) break;
+          done.add(cur);
+          (adj.get(cur) || []).forEach(([nk, w]) => { if (cd + w < (dist.has(nk) ? dist.get(nk) : Infinity)) dist.set(nk, cd + w); });
+        }
+        return dist;
+      };
+      const TYPE_NAME = { stairs: '階段', common: '共同空間', wet: '生理衛生空間', private: '個室', housework: '家事空間' };
+      const circ = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
+      const baseName = cfg.from === 'private' ? '個室' : (TYPE_NAME[cfg.from] || cfg.fromLabel);
+      const sortedComps = comps.slice().sort((x, y) => Math.min(...x.map(c => c[0])) - Math.min(...y.map(c => c[0])) || Math.min(...x.map(c => c[1])) - Math.min(...y.map(c => c[1])));
+      const needTypes = cfg.to.filter(t => (counts[t] || 0) > 0);
+      const lines = []; let badComps = 0;
+      sortedComps.forEach((comp, ci) => {
+        const cellSet = new Set(comp.map(([r, c]) => `${r},${c}`));
+        const src = [...allPts.values()].filter(pt => touchingCells(pt).some(([r, c]) => cellSet.has(`${r},${c}`))).map(key);
+        const dist = src.length ? dijkstra(src) : new Map();
+        const parts = []; let bad = false;
+        needTypes.forEach(t => {
+          let best = Infinity;
+          allPts.forEach((pt, k) => { if (dist.has(k) && typesAt(pt).has(t)) best = Math.min(best, dist.get(k)); });
+          const nm = TYPE_NAME[t] || t;
+          if (!isFinite(best)) { parts.push(`${nm}：動線が届いていません×`); bad = true; return; }
+          const m = best / 2;
+          if (m > LIMIT_MASU + 1e-9) { parts.push(`${nm}：${m.toFixed(1)}マス（${Math.round(m * 910).toLocaleString()}mm）×`); bad = true; }
+          else parts.push(`${nm}：${m.toFixed(1)}マス○`);
+        });
+        if (bad) badComps++;
+        lines.push({ name: `${baseName}${circ[ci] || (ci + 1)}`, text: parts.join('／'), bad });
+      });
+      if (badComps > 0) {
+        const detail = lines.map(l => `${l.name}（${l.text}）`).join('、');
+        items.push({ title: cfg.title, status: 'bad', text: `不適合：${cfg.fromLabel}から目的の空間までの距離が、上限${LIMIT_MASU}マス（9,100mm）を超える、または動線が届いていない箇所があります。${detail}。${cfg.badAdvice}（図の${cfg.colorName}線）。` });
+        score -= Math.min(24, 12 * badComps);
+      } else {
+        const detail = lines.map(l => `${l.name}（${l.text}）`).join('、');
+        items.push({ title: cfg.title, status: 'good', text: `適合：すべての${cfg.fromLabel}で、目的の各空間まで上限${LIMIT_MASU}マス（9,100mm）以内です。${detail}（図の${cfg.colorName}線）。` });
+      }
+    };
+    cfgList.forEach(c => evalRoutes(c));
+    return score;
+  }
+
+  function routeCfgLife() { return { title: '生活動線', list: routes.life, from: 'private', to: ['wet', 'common'], fromLabel: '個人の空間', toLabel: '生理衛生空間・共同空間', colorName: '青い', goodMax: 4, warnMax: 8, badAdvice: '直線的な動線になるよう、空間の配置を見直しましょう' }; }
+  function routeCfgChore() { return { title: '家事動線', list: routes.chore, from: 'housework', to: ['common', 'wet'], fromLabel: '家事空間', toLabel: '共同空間・生理衛生空間', colorName: 'オレンジの', goodMax: 3, warnMax: 6, badAdvice: '配膳や後片付けの負担が大きくなるため、動線を単純にしましょう' }; }
+  function routeCfgsUpper() {
+    return [
+      Object.assign(routeCfgLife(), { to: ['stairs', 'wet', 'common'], toLabel: '階段エリア・生理衛生空間・共同空間' }),
+      Object.assign(routeCfgChore(), { to: ['stairs', 'common', 'wet'], toLabel: '階段エリア・共同空間・生理衛生空間' })
+    ];
+  }
+
   function runBlockDiagnosis() {
     if (!blockGrid || !footprintMask) return;
     if (currentFloor > 1) { runBlockDiagnosisUpper(); return; }
-    const { counts, totalFootprint } = computeBlockCounts();
+    const { counts, totalFootprint, underStair } = computeBlockCounts();
     const filled = counts.circulation + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
     const unassigned = totalFootprint - filled;
 
@@ -5824,16 +6414,18 @@ ${currentReport}
     const missing = [];
     if (counts.circulation === 0) missing.push('交通空間');
     if (counts.housework === 0) missing.push('家事空間');
-    if (counts.wet === 0) missing.push('生理衛生空間');
+    if (counts.wet + (underStair.wet || 0) === 0) missing.push('生理衛生空間');
     if (counts.common === 0) missing.push('共同空間');
     if (counts.private === 0) missing.push('個人の空間');
-    if (counts.storage === 0) missing.push('収納空間');
+    if (counts.storage + (underStair.storage || 0) === 0) missing.push('収納空間');
     if (missing.length > 0) {
       items.push({ title: '6ブロックの使用', status: 'bad', text: `${missing.join('・')}が配置されていません。住宅には6つの空間すべてが必要です。` });
       score -= 10 * missing.length;
     } else {
       items.push({ title: '6ブロックの使用', status: 'good', text: '交通・家事・整理衛生・共同・個人・収納のすべての空間が計画に含まれています。' });
     }
+
+    { const sa = stairAreaItem(); if (sa) { items.push(sa.item); score -= sa.pen; } }
 
     // 3. 玄関との接続
     if (!entrance) {
@@ -5914,122 +6506,7 @@ ${currentReport}
       }
     }
 
-    // 5b/5c. 生活動線・家事動線
-    // 生徒が「動線作図」で実際に描いた線を診断材料にする（作図中は診断しない）。
-    // 始点・終点のブロック種別と、描いた線の長さ(0.5マス単位)で評価する。
-    const routeLenFine = (route) => {
-      let len = 0;
-      for (let i = 1; i < route.length; i++) {
-        const dr = route[i].fr - route[i - 1].fr, dc = route[i].fc - route[i - 1].fc;
-        len += Math.sqrt(dr * dr + dc * dc);
-      }
-      return len;
-    };
-    // 動線の頂点は 455mm 格子の交点にある。交点を囲む4セル(住宅ヴォリューム内)のゾーン種別を、その点が接するゾーンとして扱う。
-    // 境界線上の点は両側のゾーンに接している扱いにするが、離れた線どうしの交差や近接では到達扱いにしない。
-    const touchingCells = (p) => [[p.fr - 1, p.fc - 1], [p.fr - 1, p.fc], [p.fr, p.fc - 1], [p.fr, p.fc]]
-      .filter(([r, c]) => footprintMask[r] && footprintMask[r][c]);
-    const typesAt = (p) => new Set(touchingCells(p).map(([r, c]) => blockGrid[r][c]).filter(Boolean));
-    const evalRoutes = (cfg) => {
-      if (counts[cfg.from] === 0) return;
-      if (cfg.to.every(k => counts[k] === 0)) {
-        items.push({ title: cfg.title, status: 'bad', text: `${cfg.toLabel}が配置されていないため、${cfg.title}を評価できません。` });
-        score -= 10;
-        return;
-      }
-      const drawn = cfg.list.filter(r => r && r.length >= 2);
-      if (drawn.length === 0) {
-        items.push({ title: cfg.title, status: 'bad', text: `${cfg.title}が描かれていません。「動線作図」で「${cfg.title}」を選び、${cfg.fromLabel}から${cfg.toLabel}までの動線を描いてください。` });
-        score -= 15;
-        return;
-      }
-      // 始点・終点の向きは問わない：一方の端点が「必要とするブロック(from)」、もう一方が「到達先ブロック(to)」に達していれば有効。
-      // さらに、別の部屋から引いた動線が、すでに到達先へ届いている動線の途中に合流している場合は、
-      // 合流した先までを含めて「その部屋からの動線」とみなす（合流後の部分は各部屋の動線の一部）。
-      const touchesFrom = (pt) => typesAt(pt).has(cfg.from);
-      const touchesTo = (pt) => cfg.to.some(t => typesAt(pt).has(t));
-      const resolved = new Map();   // 動線の番号 -> from側から到達先までの経路（頂点の並び）
-      const hosts = new Map();      // 動線の番号 -> 到達先(to)に端点が届いている経路（到達先側が末尾）。他の動線が合流できる幹線
-      const coverPoints = [];       // 「必要とするブロック」側の端点（どの部屋から出ているかの判定用）
-      drawn.forEach((r, i) => {
-        const a = r[0], b = r[r.length - 1];
-        // 到達先に端点が届いている動線は、他の部屋の動線が合流できる幹線になる（幹線自体の反対側の端点は問わない）
-        if (touchesTo(b)) hosts.set(i, r.slice());
-        else if (touchesTo(a)) hosts.set(i, r.slice().reverse());
-        const ab = touchesFrom(a) && touchesTo(b), ba = touchesFrom(b) && touchesTo(a);
-        if (!ab && !ba) return;
-        resolved.set(i, ab ? r.slice() : r.slice().reverse());
-        if (touchesFrom(a)) coverPoints.push(a);
-        if (touchesFrom(b)) coverPoints.push(b);
-      });
-      const cellsOnSegment = (p, q) => rasterSegment(p, q);
-      for (let pass = 0; pass < drawn.length; pass++) {
-        let progressed = false;
-        drawn.forEach((r, i) => {
-          if (resolved.has(i) || hosts.has(i)) return;
-          [[r[0], r[r.length - 1], false], [r[r.length - 1], r[0], true]].forEach(([fromPt, mergePt, rev]) => {
-            if (resolved.has(i) || !touchesFrom(fromPt)) return;
-            // mergePt が、到達先へ届いている動線H上（頂点または線の途中）にあれば合流とみなす
-            hosts.forEach((H, hi) => {
-              if (resolved.has(i) || hi === i) return;
-              for (let k = 0; k < H.length - 1; k++) {
-                if (cellsOnSegment(H[k], H[k + 1]).some(cell => cell.fr === mergePt.fr && cell.fc === mergePt.fc)) {
-                  const own = rev ? r.slice().reverse() : r.slice();   // fromPt → mergePt
-                  const tail = H.slice(k + 1);                          // 合流点から先（到達先まで）
-                  const merged = own.concat(samePoint(own[own.length - 1], H[k + 1]) ? tail.slice(1) : tail);
-                  resolved.set(i, merged);
-                  hosts.set(i, merged);
-                  coverPoints.push(fromPt);
-                  progressed = true;
-                  return;
-                }
-              }
-            });
-          });
-        });
-        if (!progressed) break;
-      }
-      const valid = [...resolved.values()];
-      if (valid.length === 0) {
-        items.push({ title: cfg.title, status: 'bad', text: `描かれた${cfg.title}の端点が、${cfg.fromLabel}と${cfg.toLabel}に達していません。動線の一方の端を${cfg.fromLabel}、もう一方の端を${cfg.toLabel}に届かせてください（描く向きは問いません。別の動線の途中に合流してもかまいません）。` });
-        score -= 15;
-        return;
-      }
-      const comps = floodFillGroups((r, c) => footprintMask[r][c] && blockGrid[r][c] === cfg.from);
-      const uncovered = comps.filter(comp => !coverPoints.some(pt => touchingCells(pt).some(([tr, tc]) => comp.some(([fr, fc]) => fr === tr && fc === tc))));
-      if (uncovered.length > 0) {
-        items.push({ title: cfg.title, status: 'warn', text: `${cfg.fromLabel}の一部（${uncovered.length}か所）から、${cfg.toLabel}への${cfg.title}が描かれていません。すべての${cfg.fromLabel}から動線を描きましょう。` });
-        score -= 8;
-        return;
-      }
-      // 長さだけでは不適合にしない。動線が複雑（折れ曲がりが多い）か、目的の空間どうしが離れすぎている場合に評価を下げる。
-      const bendsOf = (route) => {
-        let n = 0;
-        for (let i = 1; i < route.length - 1; i++) {
-          const ax = route[i].fc - route[i - 1].fc, ay = route[i].fr - route[i - 1].fr;
-          const bx = route[i + 1].fc - route[i].fc, by = route[i + 1].fr - route[i].fr;
-          if (ax * by - ay * bx !== 0 || ax * bx + ay * by < 0) n++; // 向きが変わる頂点（一直線上の頂点は数えない）
-        }
-        return n;
-      };
-      const maxLen = Math.max(...valid.map(routeLenFine));
-      const maxBends = Math.max(...valid.map(bendsOf));
-      const masu = (maxLen / 2).toFixed(1);
-      const FAR_MASU = 16, LONG_MASU = 10; // 離れすぎ／やや長い の目安（マス）
-      const detail = `（動線の長さ約${masu}マス、折れ曲がり${maxBends}か所）`;
-      if (maxBends >= 4 || maxLen / 2 > FAR_MASU) {
-        const why = maxBends >= 4 ? `折れ曲がりが${maxBends}か所と多く、動線が複雑です` : `${cfg.fromLabel}と${cfg.toLabel}が離れすぎています`;
-        items.push({ title: cfg.title, status: 'bad', text: `不適合：${why}${detail}。${cfg.badAdvice}（図の${cfg.colorName}線）。` });
-        score -= 12;
-      } else if (maxBends === 3 || maxLen / 2 > LONG_MASU) {
-        items.push({ title: cfg.title, status: 'warn', text: `${cfg.fromLabel}から${cfg.toLabel}までの動線がやや複雑、または長めです${detail}。できるだけ直線的にまとめましょう（図の${cfg.colorName}線）。` });
-        score -= 6;
-      } else {
-        items.push({ title: cfg.title, status: 'good', text: `${cfg.fromLabel}から${cfg.toLabel}まで、折れ曲がりの少ない分かりやすい動線が描けています${detail}（図の${cfg.colorName}線）。長さだけでは不適合にしません。` });
-      }
-    };
-    evalRoutes({ title: '生活動線', list: routes.life, from: 'private', to: ['wet', 'common'], fromLabel: '個人の空間', toLabel: '生理衛生空間・共同空間', colorName: '青い', goodMax: 4, warnMax: 8, badAdvice: '直線的な動線になるよう、空間の配置を見直しましょう' });
-    evalRoutes({ title: '家事動線', list: routes.chore, from: 'housework', to: ['common', 'wet'], fromLabel: '家事空間', toLabel: '共同空間・生理衛生空間', colorName: 'オレンジの', goodMax: 3, warnMax: 6, badAdvice: '配膳や後片付けの負担が大きくなるため、動線を単純にしましょう' });
+    score += evaluateRouteDiagnosis(items, counts, [routeCfgLife(), routeCfgChore()]);
 
     // 6. 個人の空間のプライバシー（玄関直近に面していないか）
     if (counts.private > 0 && entrance) {
@@ -6046,49 +6523,16 @@ ${currentReport}
       }
     }
 
-    // 7. 構成比のバランス（家事空間のみ、実面積の最低基準と上限比率で評価）
-    if (filled > 0) {
-      ['common', 'private', 'storage'].forEach(type => {
-        const { min: lo, max: hi } = AREA_RATIO_GUIDE[type];
-        const val = counts[type] / filled;
-        const pct = (val * 100).toFixed(0);
-        const loPct = (lo * 100).toFixed(0), hiPct = (hi * 100).toFixed(0);
-        const withinLower = val >= lo - AREA_RATIO_TOLERANCE;
-        const withinUpper = val <= hi + AREA_RATIO_TOLERANCE;
-        const approximatelyWithin = withinLower && withinUpper;
-        const lowerGap = Math.max(0, lo - val);
-        const upperGap = Math.max(0, val - hi);
-        const tolerancePct = "2.0";
-        if (approximatelyWithin) {
-          items.push({ title: `${ZONE_LABELS[type]}の面積比`, status: 'good', text: `適合：実測比は約${(val * 100).toFixed(1)}%です。目安(${loPct}〜${hiPct}%)に対し、許容誤差±${tolerancePct}ポイント以内です。` });
-        } else {
-          const reason = lowerGap > 0 ? `下限を${(lowerGap * 100).toFixed(1)}ポイント下回っています` : `上限を${(upperGap * 100).toFixed(1)}ポイント上回っています`;
-          const over = (lowerGap > 0 ? lowerGap : upperGap) - AREA_RATIO_TOLERANCE;
-          items.push({ title: `${ZONE_LABELS[type]}の面積比`, status: 'bad', text: `不適合：実測比は約${(val * 100).toFixed(1)}%で、目安(${loPct}〜${hiPct}%)に対し${reason}（許容誤差±${tolerancePct}ポイントを${(over * 100).toFixed(1)}ポイント超過）。` });
-          score -= 8;
-        }
-      });
-
-      const houseworkMasu = counts.housework / MASU_TO_FINE;
-      const houseworkTatami = houseworkMasu / 2;
-      const houseworkRatio = counts.housework / filled;
-      const houseworkPct = (houseworkRatio * 100).toFixed(1);
-      const houseworkText = `家事空間は${houseworkMasu.toFixed(1)}マス（約${houseworkTatami.toFixed(1)}畳）です。最低基準9マス（約4.5畳）、一般目安6畳程度、上限17%、実際の面積比${houseworkPct}%（配置済みブロック全体基準）。`;
-      if (houseworkMasu < 9) {
-        items.push({ title: '家事空間の面積比・最低基準未達', status: 'bad', text: `${houseworkText}最低基準の9マス未満のため不適合です。` });
-        score -= 8;
-      } else if (houseworkRatio > 0.17 + AREA_RATIO_TOLERANCE) {
-        items.push({ title: '家事空間の面積比・上限超過', status: 'bad', text: `${houseworkText}実測比${houseworkPct}%が上限17%を許容誤差±${"2.0"}ポイント超過しているため不適合です。` });
-        score -= 8;
-      } else {
-        items.push({ title: '家事空間の面積比', status: 'good', text: `${houseworkText}最低基準9マス以上かつ上限17%以内で、基準内です。` });
-      }
-    }
+    // 7. 構成比のバランス（階数が2以上のときは全階の合計で評価する）
+    const ratioTotals = floorCount > 1 ? computeAllFloorCounts() : null;
+    const ratioCounts = ratioTotals ? ratioTotals.counts : counts;
+    const ratioFilled = ratioTotals ? ratioTotals.filled : filled;
+    { const cd = compositionDiagnosis(ratioCounts, ratioFilled, false); cd.items.forEach(it => items.push(it)); score -= cd.penalty; }
 
     // 7c. 交通空間の面積効率・最小有効幅
     // 0.5マス単位で各区間を走査し、局所的なボトルネックも必ず検出する。
     if (filled > 0 && counts.circulation > 0) {
-      const circRatio = counts.circulation / filled;
+      const circRatio = ratioFilled > 0 ? ratioCounts.circulation / ratioFilled : 0;
       const circPct = (circRatio * 100).toFixed(0);
       const isCirculation = (r, c) => footprintMask[r]?.[c] && blockGrid[r][c] === 'circulation';
       const zoneName = (v) => v === 'house' ? '建物' : v === 'parking' ? '駐車場' : v === 'garden' ? '庭' : v === 'storage' ? '収納空間' : v ? ZONE_LABELS[v] || 'その他の配置要素' : '境界・未配置';
@@ -6216,15 +6660,15 @@ ${currentReport}
       const wetMinFine = 8 * MASU_TO_FINE;
       const wetMaxFine = 12 * MASU_TO_FINE;
       const wetMarginFine = 2 * MASU_TO_FINE; // 目安から2マス分までのズレは「注意」として許容
-      const wetMasuText = (counts.wet / MASU_TO_FINE).toFixed(1);
-      const wetAreaText = (counts.wet * FINE_CELL_AREA).toFixed(2);
+      const wetMasuText = (ratioCounts.wet / MASU_TO_FINE).toFixed(1);
+      const wetAreaText = (ratioCounts.wet * FINE_CELL_AREA).toFixed(2);
 
-      if (counts.wet >= wetMinFine && counts.wet <= wetMaxFine) {
+      if (ratioCounts.wet >= wetMinFine && ratioCounts.wet <= wetMaxFine) {
         items.push({ title: '生理衛生空間の面積', status: 'good', text: `トイレ・洗面所・浴室などの合計面積は約${wetMasuText}マス(${wetAreaText}㎡)で、目安の8〜12マスに収まっています。` });
-      } else if (counts.wet >= wetMinFine - wetMarginFine && counts.wet <= wetMaxFine + wetMarginFine) {
+      } else if (ratioCounts.wet >= wetMinFine - wetMarginFine && ratioCounts.wet <= wetMaxFine + wetMarginFine) {
         items.push({ title: '生理衛生空間の面積', status: 'warn', text: `トイレ・洗面所・浴室などの合計面積は約${wetMasuText}マス(${wetAreaText}㎡)で、目安の8〜12マスからややずれています。` });
         score -= 4;
-      } else if (counts.wet < wetMinFine - wetMarginFine) {
+      } else if (ratioCounts.wet < wetMinFine - wetMarginFine) {
         items.push({ title: '生理衛生空間の面積', status: 'bad', text: `トイレ・洗面所・浴室などの合計面積は約${wetMasuText}マス(${wetAreaText}㎡)しかなく、目安の8〜12マスに対して不足しています。` });
         score -= 8;
       } else {
