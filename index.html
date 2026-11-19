@@ -1378,8 +1378,8 @@
       <div class="tool-btn-row" data-html-import-id="block-entrance-row">
        <button class="tool-btn canva-button" data-block-tool="entrance" onclick="selectBlockTool('entrance', this)" data-template-id="block-entrance-button" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text" style="background: rgb(230, 81, 0); display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">▲</span> <span class="label canva-text">玄関</span> </button><button type="button" class="tool-action-btn canva-button" id="rotateBlockEntranceBtn" onclick="rotateBlockEntrance()" title="玄関の向きを90度回転" aria-label="玄関を90度回転" style="color: rgb(19, 42, 69); background: rgb(244, 246, 249); font-weight: 700; font-size: 14px;">↻</button>
       </div>
-      <p class="tool-desc canva-text" data-template-id="block-entrance-help" style="color: rgb(124, 136, 150); font-size: 10px;">玄関（▲）を選択すると、配置計画で配置したアプローチ（黄土色）の範囲内で、図面上でクリック・ドラッグして配置し直せます。↻で90度回転します。</p><button class="tool-btn canva-button" data-block-tool="entrance-area" onclick="selectBlockTool('entrance-area', this)" data-template-id="block-entrance-area-button" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text" style="background: rgb(20, 184, 166); border: 2px solid rgb(13, 80, 75);"></span> <span class="label canva-text">玄関エリア</span> </button>
-      <p class="tool-desc canva-text" data-template-id="block-entrance-area-help" style="color: rgb(124, 136, 150); font-size: 10px;">玄関に接続する連続エリア。選択中は図面上でドラッグして移動できます。</p>
+      <p class="tool-desc canva-text" data-template-id="block-entrance-help" style="color: rgb(124, 136, 150); font-size: 10px;">玄関（▲）を選択すると、配置計画で配置したアプローチ（黄土色）の範囲内で、図面上でクリック・ドラッグして配置し直せます。↻で90度回転します。</p><button class="tool-btn canva-button" data-block-tool="foyer" onclick="selectBlockTool('foyer', this)" data-template-id="block-entrance-area-button" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text" style="background: rgb(20, 184, 166);"></span> <span class="label canva-text">玄関エリア</span> </button>
+      <p class="tool-desc canva-text" data-template-id="block-entrance-area-help" style="color: rgb(124, 136, 150); font-size: 10px;">玄関（土間・ホール）の空間。他のブロックと同じように塗りつぶして配置します（交通空間とは別の扱いです）。</p>
       <button class="tool-btn active canva-button canva-button" data-block-tool="circulation" onclick="selectBlockTool('circulation', this)" data-html-import-id="html-import-924" data-template-id="button-203" style="background: rgb(255, 255, 255); color: rgb(11, 27, 45); font-weight: 700; font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(201, 206, 214); border-color: var(--ink-navy);" data-html-import-id="html-import-925" data-template-id="span-204"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-926" data-template-id="span-205" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">交通空間</span> </button>
       <p class="tool-desc canva-text canva-text" data-html-import-id="html-import-927" data-template-id="p-206" style="color: rgb(124, 136, 150); font-weight: 400; font-style: normal; font-size: 10px;">玄関・廊下・階段・ホールなど、人が移動するための空間。</p><button class="tool-btn canva-button canva-button" data-block-tool="housework" onclick="selectBlockTool('housework', this)" data-html-import-id="html-import-928" data-template-id="button-207" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(79, 176, 174);" data-html-import-id="html-import-929" data-template-id="span-208"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-930" data-template-id="span-209" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">家事空間</span> </button>
       <p class="tool-desc canva-text canva-text" data-html-import-id="html-import-931" data-template-id="p-210" style="color: rgb(124, 136, 150); font-weight: 400; font-style: normal; font-size: 10px;">キッチン・水まわりなど、家事作業を行うための空間。</p><button class="tool-btn canva-button canva-button" data-block-tool="wet" onclick="selectBlockTool('wet', this)" data-html-import-id="html-import-932" data-template-id="button-211" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(111, 168, 220);" data-html-import-id="html-import-933" data-template-id="span-212"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-934" data-template-id="span-213" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">生理衛生空間</span> </button>
@@ -1936,7 +1936,7 @@
   // 各階のブロック数（階段エリアは交通空間に含める）。構成比は全階の合計で評価する。
   function blockCountsOfFloor(n) {
     const sg = floorStateGrid(n), bg = floorBlockGridOf(n);
-    const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0 };
+    const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0, foyer: 0 };
     let total = 0;
     if (!sg) return { counts, total };
     for (let fr = 0; fr < sg.length; fr++) for (let fc = 0; fc < sg[fr].length; fc++) {
@@ -1945,12 +1945,12 @@
       if (!bg || !bg[fr]) continue;
       let v = bg[fr][fc];
       if (sg[fr][fc] === 'stairs') v = 'circulation';
-      if (v) counts[v]++;
+      if (v && v in counts) counts[v]++;
     }
     return { counts, total };
   }
   function computeAllFloorCounts() {
-    const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0 };
+    const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0, foyer: 0 };
     let totalFootprint = 0;
     for (let n = 1; n <= floorCount; n++) {
       const f = blockCountsOfFloor(n);
@@ -2161,11 +2161,11 @@
       const rotateBtn = document.getElementById('rotateEntranceBtn');
       if (rotateBtn) rotateBtn.style.display = 'none';
     }
-    document.querySelectorAll('[data-block-tool="entrance"], [data-block-tool="entrance-area"]').forEach(b => {
+    document.querySelectorAll('[data-block-tool="entrance"], [data-block-tool="foyer"]').forEach(b => {
       b.classList.toggle('floor-locked', upper);
       b.disabled = upper;
     });
-    if (upper && (currentBlockTool === 'entrance' || currentBlockTool === 'entrance-area')) {
+    if (upper && (currentBlockTool === 'entrance' || currentBlockTool === 'foyer')) {
       currentBlockTool = 'circulation';
       document.querySelectorAll('[data-block-tool]').forEach(b => b.classList.toggle('active', b.getAttribute('data-block-tool') === 'circulation'));
     }
@@ -2307,7 +2307,7 @@
   function runBlockDiagnosisUpper() {
     if (!blockGrid || !footprintMask) return;
     const { counts, totalFootprint } = computeBlockCounts();
-    const filled = counts.circulation + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
+    const filled = counts.circulation + counts.foyer + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
     const unassigned = totalFootprint - filled;
     let score = 100;
     const items = [];
@@ -5019,7 +5019,8 @@ ${currentReport}
     wet: '#6FA8DC',
     common: '#F6B26B',
     private: '#93C47D',
-    storage: '#8E7CC3'
+    storage: '#8E7CC3',
+    foyer: '#14B8A6'
   };
   const ZONE_LABELS = {
     circulation: '交通空間',
@@ -5027,7 +5028,8 @@ ${currentReport}
     wet: '生理衛生空間',
     common: '共同空間',
     private: '個人の空間',
-    storage: '収納空間'
+    storage: '収納空間',
+    foyer: '玄関'
   };
 
   let currentStep = 1;
@@ -5175,6 +5177,7 @@ ${currentReport}
         }
       }
       footprintMask = mask;
+      syncEntranceAreaFromBlock(true);
 
       let minFR = newRows, maxFR = -1, minFC = newCols, maxFC = -1;
       for (let fr = 0; fr < newRows; fr++) {
@@ -5249,7 +5252,7 @@ ${currentReport}
     blockPaintLastCell = null;
     document.querySelectorAll('[data-block-tool]').forEach(b => b.classList.remove('active'));
     if (btnEl) btnEl.classList.add('active');
-    const modeLabel = tool === 'eraser' ? '削除' : tool === 'entrance-area' ? '玄関エリアを追加' : `追加：${ZONE_LABELS[tool] || tool}`;
+    const modeLabel = tool === 'eraser' ? '削除' : `追加：${ZONE_LABELS[tool] || tool}`;
     refreshRouteUi();
     updateRouteStatus(`${modeLabel}｜${blockPaintGranularity === 'half' ? '0.5マス' : '1マス'}単位・${blockPaintMode === 'bucket' ? 'バケツ' : 'セル'}。グリッドをクリックまたはドラッグしてください。`);
   }
@@ -5283,6 +5286,23 @@ ${currentReport}
     });
     if (changed) entranceArea = next;
     return changed;
+  }
+  // 玄関ゾーン('foyer')のセルから、診断用の entranceArea（0.5マスセル一覧）を作り直す。
+  // 旧データの entranceArea は、未塗りのセルに限り玄関ゾーンとして取り込む。
+  function syncEntranceAreaFromBlock(migrate) {
+    if (!blockGrid || currentFloor !== 1) return;
+    if (migrate && Array.isArray(entranceArea)) {
+      entranceArea.forEach(p => entranceAreaFineCells(p).forEach(([r, c]) => {
+        if (footprintMask?.[r]?.[c] && blockGrid[r] && blockGrid[r][c] === null) blockGrid[r][c] = 'foyer';
+      }));
+    }
+    const next = [];
+    for (let r = 0; r < blockGrid.length; r++) for (let c = 0; c < blockGrid[r].length; c++) {
+      const v = blockGrid[r][c];
+      if (v && !ZONE_COLORS[v]) { blockGrid[r][c] = null; continue; }
+      if (v === 'foyer' && footprintMask?.[r]?.[c]) next.push({ r, c, f: 1 });
+    }
+    entranceArea = next;
   }
   function toggleEntranceAreaCell(cell) {
     if (!cell || !entranceAreaFineCells(cell).every(([r, c]) => footprintMask?.[r]?.[c])) return;
@@ -5338,12 +5358,6 @@ ${currentReport}
         }
         return;
       }
-      if (currentBlockTool === 'entrance-area') {
-        const coarse = entranceAreaCellFromEvent(e);
-        if (coarse) toggleEntranceAreaCell(coarse);
-        blockEntranceDrag = { area: true, last: coarse };
-        return;
-      }
       if (currentBlockTool === 'entrance') {
         const ok = placeBlockEntranceFromEvent(e);
         if (!ok) updateRouteStatus('玄関は、配置計画で配置したアプローチの範囲内にだけ配置できます。アプローチ（黄土色）の上で選び直してください。');
@@ -5377,15 +5391,6 @@ ${currentReport}
       if (!isBlockPointerDown) return;
       e.preventDefault();
       e.stopPropagation();
-      if (currentBlockTool === 'entrance-area' && blockEntranceDrag?.area) {
-        const last = blockEntranceDrag.last;
-        const coarse = entranceAreaCellFromEvent(e);
-        if (coarse && last && !sameAreaCell(coarse, last)) {
-          toggleEntranceAreaCell(coarse);
-          blockEntranceDrag.last = coarse;
-        }
-        return;
-      }
       if (currentBlockTool === 'entrance' && blockEntranceDrag) {
         if (entrance) placeBlockEntranceFromEvent(e);
         return;
@@ -5498,6 +5503,7 @@ ${currentReport}
     if (blockPaintLastCell === cellKey) return;
     blockPaintLastCell = cellKey;
     const val = currentBlockTool === 'eraser' ? null : currentBlockTool;
+    if (val !== null && !ZONE_COLORS[val]) return; // ゾーン以外のツール値は塗らない（黒マス防止）
     const targetCells = (syncBlockGranularityFromButtons() === 'half') ? [[cell.fr, cell.fc]] : fineCellsOfBlockAt(cell.fr, cell.fc);
 
     let changed = false;
@@ -5549,6 +5555,7 @@ ${currentReport}
       if (clickedValue !== null) return; // 既に何か塗られているマスはバケツ塗りの対象外
     }
     const fillValue = isEraser ? null : currentBlockTool;
+    if (fillValue !== null && !ZONE_COLORS[fillValue]) return;
     const matchValue = clickedValue;
 
     const visited = Array.from({ length: blockGridDims.rows }, () => Array(blockGridDims.cols).fill(false));
@@ -5766,6 +5773,7 @@ ${currentReport}
   }
 
   function renderBlockAll() {
+    syncEntranceAreaFromBlock(false);
     const svg = document.getElementById('blockSvg');
     if (!svg || !footprintBBox || !footprintMask) return;
     syncStairsToBlock();
@@ -5794,7 +5802,7 @@ ${currentReport}
         const x = BMARGIN + (fc - minFC) * BFINE;
         const y = BMARGIN + (fr - minFR) * BFINE;
         const val = blockGrid[fr][fc];
-        const fill = val ? ZONE_COLORS[val] : '#F5EFE0';
+        const fill = (val && ZONE_COLORS[val]) ? ZONE_COLORS[val] : '#F5EFE0';
         const rect = document.createElementNS(SVG_NS, 'rect');
         rect.setAttribute('x', x);
         rect.setAttribute('y', y);
@@ -5872,27 +5880,6 @@ ${currentReport}
       }
     }
 
-    if (entranceArea.length) {
-      let topLeft = null;
-      entranceArea.forEach(p => {
-        const sz = p.f ? 1 : 2;
-        const fr0 = p.f ? p.r : p.r * 2, fc0 = p.f ? p.c : p.c * 2;
-        const x = BMARGIN + (fc0 - minFC) * BFINE;
-        const y = BMARGIN + (fr0 - minFR) * BFINE;
-        if (!topLeft || fr0 < topLeft.fr || (fr0 === topLeft.fr && fc0 < topLeft.fc)) topLeft = { fr: fr0, fc: fc0 };
-        const rect = document.createElementNS(SVG_NS, 'rect');
-        rect.setAttribute('x', x + 2); rect.setAttribute('y', y + 2);
-        rect.setAttribute('width', BFINE * sz - 4); rect.setAttribute('height', BFINE * sz - 4);
-        rect.setAttribute('fill', 'rgba(20,184,166,0.55)');
-        rect.setAttribute('stroke', '#0D504B'); rect.setAttribute('stroke-width', '2');
-        rect.style.pointerEvents = 'none'; svg.appendChild(rect);
-      });
-      const label = document.createElementNS(SVG_NS, 'text');
-      label.setAttribute('x', BMARGIN + (topLeft.fc - minFC) * BFINE + BFINE);
-      label.setAttribute('y', BMARGIN + (topLeft.fr - minFR) * BFINE + 13);
-      label.setAttribute('fill', '#063B39'); label.setAttribute('font-size', '10'); label.setAttribute('font-weight', 'bold');
-      label.textContent = '玄関エリア'; label.style.pointerEvents = 'none'; svg.appendChild(label);
-    }
     renderBlockSiteOverlay(svg, minFR, minFC, width, height);
     renderBlockCirculationLines(svg, minFR, minFC);
 
@@ -6009,7 +5996,7 @@ ${currentReport}
   }
 
   function computeBlockCounts() {
-    const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0 };
+    const counts = { circulation: 0, housework: 0, wet: 0, common: 0, private: 0, storage: 0, foyer: 0 };
     const underStair = { wet: 0, storage: 0 };
     let totalFootprint = 0;
     if (!blockGrid || !footprintMask) return { counts, totalFootprint, underStair };
@@ -6021,7 +6008,7 @@ ${currentReport}
         let v = blockGrid[fr][fc];
         // 階段エリアは交通空間に含める（階段下の収納・生理衛生の利用分は underStair に記録する）
         if (stateGrid[fr] && stateGrid[fr][fc] === 'stairs' && v) { if (v === 'wet' || v === 'storage') underStair[v]++; v = 'circulation'; }
-        if (v) counts[v]++;
+        if (v && v in counts) counts[v]++;
       }
     }
     return { counts, totalFootprint, underStair };
@@ -6059,7 +6046,7 @@ ${currentReport}
     const tot = floorCount > 1 ? computeAllFloorCounts() : null;
     const counts = tot ? tot.counts : cur.counts;
     const totalFootprint = tot ? tot.totalFootprint : cur.totalFootprint;
-    const filled = counts.circulation + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
+    const filled = counts.circulation + counts.foyer + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
     const unassigned = totalFootprint - filled;
 
     if (totalFootprint === 0) {
@@ -6099,7 +6086,7 @@ ${currentReport}
     const STATUS_ICON = { good: '○', warn: '△', bad: '×' };
     const STATUS_COLOR = { good: 'var(--good)', warn: 'var(--warn)', bad: 'var(--bad)' };
 
-    const order = ['circulation', 'housework', 'wet', 'common', 'private', 'storage'];
+    const order = ['circulation', 'foyer', 'housework', 'wet', 'common', 'private', 'storage'];
     const rowsHtml = order.map(key => {
       const cnt = counts[key];
       const pct = totalFootprint > 0 ? (cnt / totalFootprint * 100) : 0;
@@ -6406,7 +6393,7 @@ ${currentReport}
     if (!blockGrid || !footprintMask) return;
     if (currentFloor > 1) { runBlockDiagnosisUpper(); return; }
     const { counts, totalFootprint, underStair } = computeBlockCounts();
-    const filled = counts.circulation + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
+    const filled = counts.circulation + counts.foyer + counts.housework + counts.wet + counts.common + counts.private + counts.storage;
     const unassigned = totalFootprint - filled;
 
     let score = 100;
