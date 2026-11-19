@@ -2009,7 +2009,7 @@
     if (tool === 'house') return lowerHouseAt(fr, fc);
     if (tool === 'stairs') return currentFloor === 1 ? true : lowerHouseAt(fr, fc);
     if (tool === 'roof') return lowerHouseAt(fr, fc) && !isVol(st);
-    if (tool === 'balcony') return !isVol(st);
+    if (tool === 'balcony') return true;
     return true;
   }
   function upperToolNotice(tool) {
@@ -4834,7 +4834,9 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
 
     if (['south', 'se_corner', 'sw_corner', 'ns_through'].includes(currentPattern)) {
       const entranceR = Math.floor(entrance.fr / 2);
-      if (entranceR < minParkR) {
+      // 玄関からのアプローチが駐車スペースの裏（奥）に回り込んでいても、
+      // 駐車スペースとの間に1マス以上の間隔があれば、車の後方を通らず安全に通行できるため「適合」とする。
+      if (entranceR < minParkR && (minParkR - entranceR) <= 1) {
         for (let c = 0; c < cols; c++) {
           if (csAt(entranceR, c) === 'approach' && csAt(minParkR, c) === 'parking') return true;
         }
@@ -5034,7 +5036,11 @@ ${currentReport}
   // 診断時に計算する動線の経路（各要素は[r,c]の配列）。診断を実行するたびに更新し、
   // ブロックプラン図に色分けした線として重ねて描画する。
   let footprintMask = null;        // [fr][fc] = true/false（住宅ヴォリュームの範囲）
-  let footprintBBox = null;        // { minFR, maxFR, minFC, maxFC }（表示用の余白込み範囲）
+  let footprintBBox = null;        // { minFR, maxFR, minFC, maxFC }（表示用の余白込み範囲。常に敷地全体=0起点）
+  // 住宅ヴォリューム自体の外形（敷地全体ではなく実際の外壁の範囲）の原点。
+  // 外壁が敷地の絶対グリッドに対して0.5マス（1 fineセル）ずれて配置されている場合でも、
+  // 1マス単位の塗りつぶしをこの原点を基準にグルーピングすることで、実際の外壁位置に揃える。
+  let footprintOrigin = { r: 0, c: 0 };
   let currentBlockTool = 'circulation';
   let blockHistoryStack = [];
   let blockResetSnapshot = null;
@@ -5101,6 +5107,17 @@ ${currentReport}
   function fineCellsOfBlock(r, c) {
     const fr = r * 2, fc = c * 2;
     return [[fr, fc], [fr, fc + 1], [fr + 1, fc], [fr + 1, fc + 1]];
+  }
+
+  // 住宅ヴォリュームの外壁が0.5マス位置にある（敷地の絶対グリッドと半マスずれている）場合でも、
+  // 実際の外壁位置を基準に1マス分をまとめて取得する。footprintBBoxの原点(minFR, minFC)を
+  // 基準にして0.5マスセル(fr,fc)を含む1マス単位のグルーピングを計算する。
+  function fineCellsOfBlockAt(fr, fc) {
+    const base = footprintOrigin || { r: 0, c: 0 };
+    const localR = fr - base.r, localC = fc - base.c;
+    const r0 = base.r + Math.floor(localR / 2) * 2;
+    const c0 = base.c + Math.floor(localC / 2) * 2;
+    return [[r0, c0], [r0, c0 + 1], [r0 + 1, c0], [r0 + 1, c0 + 1]];
   }
 
   // 表示中のボタン（押されている方）を正として塗りつぶし単位を決める
@@ -5170,6 +5187,9 @@ ${currentReport}
           }
         }
       }
+      // 住宅ヴォリューム自体の外壁位置（1マス塗りのグルーピング基準）を、表示範囲で上書きする前に保存する。
+      if (maxFR >= minFR && maxFC >= minFC) footprintOrigin = { r: minFR, c: minFC };
+
       // 敷地全体（境界・道路・駐車場）を表示するため、表示範囲は敷地全体とする。
       minFR = 0; maxFR = newRows - 1; minFC = 0; maxFC = newCols - 1;
       footprintBBox = { minFR, maxFR, minFC, maxFC };
@@ -5478,8 +5498,7 @@ ${currentReport}
     if (blockPaintLastCell === cellKey) return;
     blockPaintLastCell = cellKey;
     const val = currentBlockTool === 'eraser' ? null : currentBlockTool;
-    const r = Math.floor(cell.fr / 2), c = Math.floor(cell.fc / 2);
-    const targetCells = (syncBlockGranularityFromButtons() === 'half') ? [[cell.fr, cell.fc]] : fineCellsOfBlock(r, c);
+    const targetCells = (syncBlockGranularityFromButtons() === 'half') ? [[cell.fr, cell.fc]] : fineCellsOfBlockAt(cell.fr, cell.fc);
 
     let changed = false;
     targetCells.forEach(([ffr, ffc]) => {
