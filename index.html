@@ -10,7 +10,7 @@
   <script src="/_sdk/6542d56fbfe7a3eb.telemetry_sdk.js" integrity="sha512-ECdM0nK7EkwDuOqho2qxgyRQXyBHk9hZqRKMBr+Xsu6zjeHlt+qkO2N2YRiHN7Kg4e1fEHDhjIp4bGJYVypv1g=="></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>住宅配置計画トレーニング Ver.101(モジュール変更対応)</title><!--
+  <title>住宅配置計画トレーニング ver.1.20 (AI機能・インタラクティブ調整搭載)</title><!--
   ver.2.4.3: オフライン対応
   - 外部CDN(Google Fonts / Tailwind CSS CDN)への依存を廃止し、
     フォントは端末の標準フォント（游ゴシック・ヒラギノ角ゴ等）にフォールバック、
@@ -602,7 +602,7 @@
      <!-- Toolbar -->
      <div class="tools canva-container canva-container" data-html-import-id="html-import-166" data-template-id="div-121" style="background: rgb(255, 255, 255);">
       <div style="display:flex; gap:6px;" data-html-import-id="html-import-167">
-       <button onclick="undo()" class="btn-group canva-button canva-button" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--line-soft); background: rgb(248, 250, 252); border-radius: 4px; font-size: 12px; text-align: center; color: rgb(0, 0, 0); font-weight: 400; font-style: normal;" data-html-import-id="html-import-168" data-template-id="button-122">↩ 戻る</button> <button onclick="resetGrid(true)" class="btn-group canva-button canva-button" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--bad); background: rgb(255, 245, 245); color: rgb(211, 47, 47); border-radius: 4px; font-size: 12px; text-align: center; font-weight: 400; font-style: normal;" data-html-import-id="html-import-169" data-template-id="button-123">リセット</button>
+       <button onclick="undo()" class="btn-group canva-button canva-button" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--line-soft); background: rgb(248, 250, 252); border-radius: 4px; font-size: 12px; text-align: center; color: rgb(0, 0, 0); font-weight: 400; font-style: normal;" data-html-import-id="html-import-168" data-template-id="button-122">↩ 戻る</button> <button onclick="redo()" class="btn-group canva-button canva-button" title="戻りすぎたときに、取り消した操作をやり直します" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--line-soft); background: rgb(248, 250, 252); border-radius: 4px; font-size: 12px; text-align: center; color: rgb(0, 0, 0); font-weight: 400; font-style: normal;">進む ↪</button> <button onclick="resetGrid(true)" class="btn-group canva-button canva-button" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--bad); background: rgb(255, 245, 245); color: rgb(211, 47, 47); border-radius: 4px; font-size: 12px; text-align: center; font-weight: 400; font-style: normal;" data-html-import-id="html-import-169" data-template-id="button-123">リセット</button>
       </div>
       <div class="drawing-save-panel canva-container" data-template-id="div-124" style="background: rgb(248, 250, 252);" data-html-import-id="html-import-170">
        <div class="drawing-save-actions" data-html-import-id="html-import-171">
@@ -1362,7 +1362,7 @@
        </div>
       </div>
       <div style="display:flex; gap:6px;" data-html-import-id="html-import-952">
-       <button onclick="undoBlock()" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--line-soft); background: rgb(248, 250, 252); border-radius: 4px; font-size: 12px; text-align: center; cursor: pointer; color: rgb(0, 0, 0); font-weight: 400; font-style: normal;" data-html-import-id="html-import-953" data-template-id="button-231" class="canva-button canva-button">↩ 戻る</button> <button onclick="resetBlockGrid(true)" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--bad); background: rgb(255, 245, 245); color: rgb(211, 47, 47); border-radius: 4px; font-size: 12px; text-align: center; cursor: pointer; font-weight: 400; font-style: normal;" data-html-import-id="html-import-954" data-template-id="button-232" class="canva-button canva-button">リセット</button>
+       <button onclick="undoBlock()" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--line-soft); background: rgb(248, 250, 252); border-radius: 4px; font-size: 12px; text-align: center; cursor: pointer; color: rgb(0, 0, 0); font-weight: 400; font-style: normal;" data-html-import-id="html-import-953" data-template-id="button-231" class="canva-button canva-button">↩ 戻る</button> <button onclick="redoBlock()" title="戻りすぎたときに、取り消した操作をやり直します" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--line-soft); background: rgb(248, 250, 252); border-radius: 4px; font-size: 12px; text-align: center; cursor: pointer; color: rgb(0, 0, 0); font-weight: 400; font-style: normal;" class="canva-button canva-button">進む ↪</button> <button onclick="resetBlockGrid(true)" style="flex: 1 1 0%; padding: 6px; border: 1px solid var(--bad); background: rgb(255, 245, 245); color: rgb(211, 47, 47); border-radius: 4px; font-size: 12px; text-align: center; cursor: pointer; font-weight: 400; font-style: normal;" data-html-import-id="html-import-954" data-template-id="button-232" class="canva-button canva-button">リセット</button>
       </div>
       <div style="margin-bottom:10px;" data-html-import-id="html-import-913">
        <div style="font-size: 10px; color: rgb(124, 136, 150); font-weight: 700; margin-bottom: 3px; font-style: normal;" data-html-import-id="html-import-914" data-template-id="div-196" class="canva-container canva-container">
@@ -1386,7 +1386,7 @@
        <button class="tool-btn canva-button" data-block-tool="entrance" onclick="selectBlockTool('entrance', this)" data-template-id="block-entrance-button" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text" style="background: rgb(230, 81, 0); display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">▲</span> <span class="label canva-text">玄関</span> </button><button type="button" class="tool-action-btn canva-button" id="rotateBlockEntranceBtn" onclick="rotateBlockEntrance()" title="玄関の向きを90度回転" aria-label="玄関を90度回転" style="color: rgb(19, 42, 69); background: rgb(244, 246, 249); font-weight: 700; font-size: 14px;">↻</button>
       </div>
       <p class="tool-desc canva-text" data-template-id="block-entrance-help" style="color: rgb(124, 136, 150); font-size: 10px;">玄関（▲）を選択すると、配置計画で配置したアプローチ（黄土色）の範囲内で、図面上でクリック・ドラッグして配置し直せます。↻で90度回転します。</p><button class="tool-btn canva-button" data-block-tool="entrance-area" onclick="selectBlockTool('entrance-area', this)" data-template-id="block-entrance-area-button" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text" style="background: rgb(20, 184, 166); border: 2px solid rgb(13, 80, 75);"></span> <span class="label canva-text">玄関エリア</span> </button>
-      <p class="tool-desc canva-text" data-template-id="block-entrance-area-help" style="color: rgb(124, 136, 150); font-size: 10px;">玄関に接続する連続エリア。選択中は図面上でドラッグして移動できます。</p>
+      <p class="tool-desc canva-text" data-template-id="block-entrance-area-help" style="color: rgb(124, 136, 150); font-size: 10px;">玄関まわりの交通空間。他のゾーンと同じように塗れます（交通空間として扱われます）。後から別のゾーンで塗ると、そのゾーンに変わります。</p>
       <button class="tool-btn active canva-button canva-button" data-block-tool="circulation" onclick="selectBlockTool('circulation', this)" data-html-import-id="html-import-924" data-template-id="button-203" style="background: rgb(255, 255, 255); color: rgb(11, 27, 45); font-weight: 700; font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(201, 206, 214); border-color: var(--ink-navy);" data-html-import-id="html-import-925" data-template-id="span-204"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-926" data-template-id="span-205" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">交通空間</span> </button>
       <p class="tool-desc canva-text canva-text" data-html-import-id="html-import-927" data-template-id="p-206" style="color: rgb(124, 136, 150); font-weight: 400; font-style: normal; font-size: 10px;">玄関・廊下・階段・ホールなど、人が移動するための空間。</p><button class="tool-btn canva-button canva-button" data-block-tool="housework" onclick="selectBlockTool('housework', this)" data-html-import-id="html-import-928" data-template-id="button-207" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(79, 176, 174);" data-html-import-id="html-import-929" data-template-id="span-208"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-930" data-template-id="span-209" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">家事空間</span> </button>
       <p class="tool-desc canva-text canva-text" data-html-import-id="html-import-931" data-template-id="p-210" style="color: rgb(124, 136, 150); font-weight: 400; font-style: normal; font-size: 10px;">キッチン・水まわりなど、家事作業を行うための空間。</p><button class="tool-btn canva-button canva-button" data-block-tool="wet" onclick="selectBlockTool('wet', this)" data-html-import-id="html-import-932" data-template-id="button-211" style="background: rgb(244, 246, 249); color: rgb(11, 27, 45); font-size: 13px;"> <span class="swatch canva-text canva-text" style="background: rgb(111, 168, 220);" data-html-import-id="html-import-933" data-template-id="span-212"></span> <span class="label canva-text canva-text" data-html-import-id="html-import-934" data-template-id="span-213" style="color: rgb(11, 27, 45); font-weight: 400; font-style: normal; font-size: 16px;">生理衛生空間</span> </button>
@@ -1604,6 +1604,7 @@
   let entranceDir = 0; // Default Up
 
   let historyStack = [];
+  let redoStack = [];
   let resetSnapshot = null;
   let isPointerDown = false;
   let carDrag = null; // 自動車のドラッグ移動/クリック回転を管理する一時オブジェクト
@@ -2135,7 +2136,7 @@
     routeDraft = null; routeGesture = null; isPointerDown = false; carDrag = null; isBlockPointerDown = false; blockPaintLastCell = null; blockEntranceDrag = null;
     stashCurrentFloor();
     loadFloorToGlobals(n);
-    historyStack = []; blockHistoryStack = []; blockResetSnapshot = null; resetSnapshot = null;
+    historyStack = []; redoStack = []; blockHistoryStack = []; blockRedoStack = []; blockResetSnapshot = null; resetSnapshot = null;
     let notice = '';
     if (n > 1) {
       const removed = pruneUpperFloorAgainstLower();
@@ -2591,7 +2592,7 @@
         zoneGrid=next.zoneGrid; stateGrid=next.stateGrid; entrance=next.entrance; entranceDir=next.entranceDir; entranceArea=Array.isArray(next.entranceArea) ? next.entranceArea : []; cars=next.cars || []; routes=next.routes; routeDraft=null; routeGesture=null;
         blockGrid=next.blockGrid || null; blockGridDims=next.blockGridDims || {rows:0,cols:0}; blockPaintMode=next.blockPaintMode || 'cell'; blockPaintGranularity=next.blockPaintGranularity || 'full'; try { setBlockPaintGranularity(blockPaintGranularity); } catch (e) {}
         entranceArea = Array.isArray(next.entranceArea) ? next.entranceArea.map(p => Number.isInteger(p?.r) && Number.isInteger(p?.c) ? (p.f ? { r: p.r, c: p.c, f: 1 } : { r: p.r, c: p.c }) : { r: Math.floor((p?.fr || 0) / 2), c: Math.floor((p?.fc || 0) / 2) }) : [];
-        resetSnapshot=null; historyStack=[]; pushHistory(); updateBrief(); renderAll(); invalidateDiagnosis();
+        resetSnapshot=null; historyStack=[]; redoStack=[]; pushHistory(); updateBrief(); renderAll(); invalidateDiagnosis();
 if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
         const wantStep2 = !!blockGrid && (next.currentStep === 2 || next.currentStep === undefined);
         if (wantStep2) { goToStep(2); renderBlockAll(); updateBlockComposition(); invalidateBlockDiagnosis(); }
@@ -2930,9 +2931,12 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
     updateBlockComposition();
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { cancelRouteDraft(); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
         e.preventDefault();
         if (!cancelRouteDraft()) undo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
       }
     });
   }
@@ -3424,7 +3428,7 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
       }
     }
 
-    historyStack = [];
+    historyStack = []; redoStack = [];
     pushHistory();
     updateBrief();
     renderAll();
@@ -3502,12 +3506,28 @@ if (blockGrid) { footprintMask=stateGrid.map(row => row.map(v => isVol(v))); }
       cars: JSON.parse(JSON.stringify(cars))
     });
     if (historyStack.length > 20) historyStack.shift();
+    redoStack = [];
   }
 
+  function applyHistoryState(last) {
+    stateGrid = JSON.parse(JSON.stringify(last.stateGrid));
+    entrance = last.entrance ? { ...last.entrance } : null;
+    cars = last.cars ? JSON.parse(JSON.stringify(last.cars)) : [];
+    renderAll();
+    invalidateDiagnosis();
+  }
+  function redo() {
+    if (!redoStack.length) return;
+    const st = redoStack.pop();
+    historyStack.push(st);
+    applyHistoryState(st);
+  }
+  window.redo = redo;
+
   function undo() {
-    if (restoreResetSnapshot()) return;
+    if (restoreResetSnapshot()) { redoStack = []; return; }
     if (historyStack.length > 1) {
-      historyStack.pop();
+      redoStack.push(historyStack.pop());
       const last = historyStack[historyStack.length - 1];
       stateGrid = JSON.parse(JSON.stringify(last.stateGrid));
       entrance = last.entrance ? { ...last.entrance } : null;
@@ -5069,6 +5089,7 @@ ${currentReport}
   let footprintBBox = null;        // { minFR, maxFR, minFC, maxFC }（表示用の余白込み範囲）
   let currentBlockTool = 'circulation';
   let blockHistoryStack = [];
+  let blockRedoStack = [];
   let blockResetSnapshot = null;
   let isBlockPointerDown = false;
   let blockListenersReady = false;
@@ -5180,7 +5201,7 @@ ${currentReport}
         // 敷地サイズが変わった場合は新しいブロックグリッドを作り直す
         blockGrid = Array.from({ length: newRows }, () => Array(newCols).fill(null));
         blockGridDims = { rows: newRows, cols: newCols };
-        blockHistoryStack = [];
+        blockHistoryStack = []; blockRedoStack = [];
       } else {
         // 住宅の形が変わり、範囲外になったセルの塗りはクリアする
         for (let fr = 0; fr < newRows; fr++) {
@@ -5261,7 +5282,7 @@ ${currentReport}
     blockPaintLastCell = null;
     document.querySelectorAll('[data-block-tool]').forEach(b => b.classList.remove('active'));
     if (btnEl) btnEl.classList.add('active');
-    const modeLabel = tool === 'eraser' ? '削除' : tool === 'entrance-area' ? '玄関エリアを追加' : `追加：${ZONE_LABELS[tool] || tool}`;
+    const modeLabel = tool === 'eraser' ? '削除' : tool === 'entrance-area' ? '追加：玄関エリア(交通空間)' : `追加：${ZONE_LABELS[tool] || tool}`;
     refreshRouteUi();
     updateRouteStatus(`${modeLabel}｜${blockPaintGranularity === 'half' ? '0.5マス' : '1マス'}単位・${blockPaintMode === 'bucket' ? 'バケツ' : 'セル'}。グリッドをクリックまたはドラッグしてください。`);
   }
@@ -5296,13 +5317,27 @@ ${currentReport}
     if (changed) entranceArea = next;
     return changed;
   }
-  function toggleEntranceAreaCell(cell) {
-    if (!cell || !entranceAreaFineCells(cell).every(([r, c]) => footprintMask?.[r]?.[c])) return;
-    const index = entranceArea.findIndex(p => sameAreaCell(p, cell));
-    if (index >= 0) entranceArea.splice(index, 1);
-    else entranceArea.push(cell.f ? { r: cell.r, c: cell.c, f: 1 } : { r: cell.r, c: cell.c });
-    renderBlockAll();
-    invalidateBlockDiagnosis();
+  // 玄関エリアは「交通空間(circulation)」のブロックとして塗られ、そのうえで玄関エリアの印(entranceArea)を持つ。
+  // 他のゾーンを後から塗る・消しゴムで消すと、玄関エリアの印も外れて後から塗ったブロックに変わる。
+  function setEntranceAreaFine(cells, on) {
+    const set = new Set();
+    (entranceArea || []).forEach(p => entranceAreaFineCells(p).forEach(([r, c]) => set.add(r + ',' + c)));
+    let changed = false;
+    cells.forEach(([r, c]) => {
+      const k = r + ',' + c;
+      if (on && !set.has(k)) { set.add(k); changed = true; }
+      else if (!on && set.has(k)) { set.delete(k); changed = true; }
+    });
+    if (changed) entranceArea = [...set].map(k => { const [r, c] = k.split(',').map(Number); return { r, c, f: 1 }; });
+    return changed;
+  }
+  function enforceEntranceAreaBlocks() {
+    if (currentFloor !== 1 || !Array.isArray(entranceArea) || !entranceArea.length || !blockGrid || !footprintMask) return;
+    const keep = [];
+    entranceArea.forEach(p => entranceAreaFineCells(p).forEach(([r, c]) => {
+      if (footprintMask[r]?.[c]) { blockGrid[r][c] = 'circulation'; keep.push({ r, c, f: 1 }); }
+    }));
+    entranceArea = keep;
   }
 
   function setupBlockEventListeners() {
@@ -5350,12 +5385,6 @@ ${currentReport}
         }
         return;
       }
-      if (currentBlockTool === 'entrance-area') {
-        const coarse = entranceAreaCellFromEvent(e);
-        if (coarse) toggleEntranceAreaCell(coarse);
-        blockEntranceDrag = { area: true, last: coarse };
-        return;
-      }
       if (currentBlockTool === 'entrance') {
         const ok = placeBlockEntranceFromEvent(e);
         if (!ok) updateRouteStatus('玄関は、配置計画で配置したアプローチの範囲内にだけ配置できます。アプローチ（黄土色）の上で選び直してください。');
@@ -5389,15 +5418,6 @@ ${currentReport}
       if (!isBlockPointerDown) return;
       e.preventDefault();
       e.stopPropagation();
-      if (currentBlockTool === 'entrance-area' && blockEntranceDrag?.area) {
-        const last = blockEntranceDrag.last;
-        const coarse = entranceAreaCellFromEvent(e);
-        if (coarse && last && !sameAreaCell(coarse, last)) {
-          toggleEntranceAreaCell(coarse);
-          blockEntranceDrag.last = coarse;
-        }
-        return;
-      }
       if (currentBlockTool === 'entrance' && blockEntranceDrag) {
         if (entrance) placeBlockEntranceFromEvent(e);
         return;
@@ -5509,7 +5529,8 @@ ${currentReport}
     const cellKey = `${cell.fr},${cell.fc}`;
     if (blockPaintLastCell === cellKey) return;
     blockPaintLastCell = cellKey;
-    const val = currentBlockTool === 'eraser' ? null : currentBlockTool;
+    const isEA = currentBlockTool === 'entrance-area';
+    const val = currentBlockTool === 'eraser' ? null : (isEA ? 'circulation' : currentBlockTool);
     const r = Math.floor(cell.fr / 2), c = Math.floor(cell.fc / 2);
     const targetCells = (syncBlockGranularityFromButtons() === 'half') ? [[cell.fr, cell.fc]] : fineCellsOfBlock(r, c);
 
@@ -5522,10 +5543,10 @@ ${currentReport}
         changed = true;
       }
     });
-    // 消しゴムでは、他のブロックと同様に玄関エリアも消せる
-    if (currentBlockTool === 'eraser') {
-      const inside = targetCells.filter(([ffr, ffc]) => footprintMask[ffr] && footprintMask[ffr][ffc]);
-      if (eraseEntranceAreaFine(inside)) changed = true;
+    // 玄関エリア：交通空間として塗り、玄関エリアの印を付ける。他のブロック・消しゴムで塗り替えた場合は印を外す。
+    {
+      const inside = targetCells.filter(([ffr, ffc]) => footprintMask[ffr] && footprintMask[ffr][ffc] && !(currentFloor > 1 && val && val !== 'circulation' && stateGrid[ffr][ffc] === 'stairs'));
+      if (setEntranceAreaFine(inside, isEA && currentFloor === 1)) changed = true;
     }
 
     if (changed) {
@@ -5561,7 +5582,8 @@ ${currentReport}
     } else {
       if (clickedValue !== null) return; // 既に何か塗られているマスはバケツ塗りの対象外
     }
-    const fillValue = isEraser ? null : currentBlockTool;
+    const isEA = currentBlockTool === 'entrance-area';
+    const fillValue = isEraser ? null : (isEA ? 'circulation' : currentBlockTool);
     const matchValue = clickedValue;
 
     const visited = Array.from({ length: blockGridDims.rows }, () => Array(blockGridDims.cols).fill(false));
@@ -5588,6 +5610,7 @@ ${currentReport}
     if (cellsToFill.length === 0) return;
     cellsToFill.forEach(([cfr, cfc]) => { blockGrid[cfr][cfc] = fillValue; });
     if (isEraser) eraseEntranceAreaFine(cellsToFill);
+    else if (isEA && currentFloor === 1) setEntranceAreaFine(cellsToFill, true);
     renderBlockAll();
     updateBlockStats();
     invalidateBlockDiagnosis();
@@ -5597,7 +5620,18 @@ ${currentReport}
     if (!blockGrid) return;
     blockHistoryStack.push({ g: JSON.parse(JSON.stringify(blockGrid)), ea: JSON.parse(JSON.stringify(entranceArea || [])) });
     if (blockHistoryStack.length > 20) blockHistoryStack.shift();
+    blockRedoStack = [];
   }
+
+  function redoBlock() {
+    if (!blockRedoStack.length) return;
+    const hs = blockRedoStack.pop();
+    blockHistoryStack.push(hs);
+    blockGrid = JSON.parse(JSON.stringify(hs.g));
+    if (currentFloor === 1) entranceArea = JSON.parse(JSON.stringify(hs.ea || []));
+    renderBlockAll(); updateBlockStats(); invalidateBlockDiagnosis();
+  }
+  window.redoBlock = redoBlock;
 
   function undoBlock() {
     if (blockResetSnapshot) {
@@ -5607,10 +5641,11 @@ ${currentReport}
       currentBlockTool = s.currentBlockTool; blockPaintMode = s.blockPaintMode;
       setBlockPaintGranularity(s.blockPaintGranularity || 'full'); blockResetSnapshot = null;
       renderBlockAll(); updateBlockStats(); invalidateBlockDiagnosis();
+      blockRedoStack = [];
       return;
     }
     if (blockHistoryStack.length > 1) {
-      blockHistoryStack.pop();
+      blockRedoStack.push(blockHistoryStack.pop());
       const hs = blockHistoryStack[blockHistoryStack.length - 1];
       blockGrid = JSON.parse(JSON.stringify(hs.g));
       if (currentFloor === 1) entranceArea = JSON.parse(JSON.stringify(hs.ea || []));
@@ -5779,6 +5814,7 @@ ${currentReport}
   }
 
   function renderBlockAll() {
+    enforceEntranceAreaBlocks();
     const svg = document.getElementById('blockSvg');
     if (!svg || !footprintBBox || !footprintMask) return;
     syncStairsToBlock();
